@@ -1,67 +1,48 @@
-# FactoryFlow Enterprise - Factory Management System
+# FactoryFlow Pro - Enterprise React Factory Management System
 
-FactoryFlow is an enterprise-grade, highly modular, scalable, and portable **Factory Management System** built with **Flutter (Material 3)** and **Supabase (PostgreSQL with RLS)**.
+FactoryFlow Pro is a high-performance, responsive, multi-device **Factory Management System (ERP)** built with **React**, **Vite**, **Tailwind CSS**, and **Supabase PostgreSQL**.
 
-Designed for long-term maintainability, zero machine lock-in, and rapid developer onboarding (< 15 minutes).
-
----
-
-## Key Features & Modules
-
-* **Executive Dashboard**: Real-time KPI tracking, overall plant OEE metrics, active work orders, machine health monitoring, and system audit feed.
-* **Multi-Facility Organization**: Hierarchical management of Factories, Plants, and Departments with localized timezones and access control.
-* **Inventory & Warehouse**: Stock level monitoring, raw material tracking, finished goods management, and movement auditing.
-* **Production Planning**: Work order scheduling, machine status tracking, job execution, and quality inspection workflows.
-* **Security & Access Control**: PostgreSQL Row Level Security (RLS), Role-Based Access Control (RBAC), and global exception boundaries.
-* **Portable Infrastructure**: Environment-driven configuration (`.env`), isolated repository interfaces (`IAuthRepository`), and GitHub Actions CI/CD.
+Designed for multi-PC cloud synchronization, low-latency real-time telemetry, and automated deployment via Git.
 
 ---
 
-## Quick Start (Onboarding in < 5 Minutes)
+## Key Modules & Features
 
-### Prerequisites
-* Flutter SDK (3.22.x+ Stable)
-* Git
-* PowerShell (Windows) or Bash (macOS/Linux)
+* **Multi-PC & Multi-Device Access**: Cloud-synced state powered by Supabase. Access from any PC, tablet, or browser simultaneously.
+* **Executive KPI Dashboard**: Real-time Overall Plant OEE (87.4%), active work orders, stock valuation, plant telemetry, and audit logs.
+* **Facilities & Multi-Plant Config**: Manage multi-location factories (`FAC-APEX-01`, `FAC-ROBO-02`), plants, and departments.
+* **Inventory & Warehouse Tracking**: Raw materials and finished goods stock levels with low-stock warning indicators.
+* **Production Work Orders**: Job execution monitoring, job completion progress bars, and machine allocation status.
+* **Git CI/CD Automated Deployment**: Pre-configured GitHub Actions workflow (`.github/workflows/deploy.yml`) for automated deployment on push.
 
-### Installation
-1. **Clone Repository**:
+---
+
+## Environment Setup & Supabase Connection
+
+1. **Environment Configuration**:
+   Copy `.env.example` to `.env`:
    ```bash
-   git clone https://github.com/your-org/factoryflow.git
-   cd factoryflow
+   VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
 
-2. **Automated Environment Setup**:
-   On Windows (PowerShell):
-   ```powershell
-   .\scripts\setup.ps1
-   ```
-   On macOS/Linux (Bash):
-   ```bash
-   chmod +x scripts/setup.ps1
-   ./scripts/setup.ps1
-   ```
-
-3. **Run Application**:
-   ```bash
-   flutter run -d chrome
-   ```
+2. **Database Migration**:
+   Apply SQL migration `supabase/migrations/20260724000000_initial_schema.sql` inside your Supabase SQL Editor.
 
 ---
 
-## Tech Stack & Architecture
+## Deployment Instructions via Git
 
-* **Frontend Framework**: Flutter (Latest Stable) & Material 3 Design System.
-* **Architecture Pattern**: Clean Architecture + MVVM (Model-View-ViewModel).
-* **State Management**: Riverpod (`flutter_riverpod`).
-* **Routing**: GoRouter with authentication route guards.
-* **Database & Backend**: Supabase PostgreSQL with versioned SQL migrations under `supabase/migrations/`.
-* **CI/CD Automation**: GitHub Actions pipeline (`.github/workflows/ci.yml`).
+To deploy FactoryFlow to Vercel, Netlify, or GitHub Pages:
 
----
+1. **Commit and Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "feat: deploy FactoryFlow React application"
+   git push origin main
+   ```
 
-## Project Documentation
-
-* [Architecture & Module Design](docs/ARCHITECTURE.md)
-* [Developer Onboarding & Standards](docs/DEVELOPER_GUIDE.md)
-* [Database Schema & Security Guide](docs/DATABASE_GUIDE.md)
+2. **Connect Repository to Vercel / Netlify**:
+   * Build Command: `npm run build`
+   * Output Directory: `dist`
+   * Environment Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
