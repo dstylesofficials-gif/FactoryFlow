@@ -1,0 +1,46 @@
+name: FactoryFlow Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  analyze_and_test:
+    name: Code Quality & Automated Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java SDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter Environment
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter Installation
+        run: flutter --version
+
+      - name: Install Package Dependencies
+        run: flutter pub get
+
+      - name: Verify Code Formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: Run Static Code Analysis
+        run: flutter analyze
+
+      - name: Execute Automated Test Suite
+        run: flutter test
+
+      - name: Build Web Application Bundle
+        run: flutter build web --release
