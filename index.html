@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FactoryFlow Pro - Enterprise Factory Management System</title>
+    <title>FactoryFlow Pro - Enterprise Factory Management System (اردو / English)</title>
     
-    <!-- Google Fonts -->
+    <!-- Modern Typography: Inter + Space Grotesk + Noto Nastaliq Urdu -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,10 +25,12 @@
                 600: '#0369a1',
                 700: '#075985',
               },
+              amberBrand: '#d97706',
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
               display: ['Space Grotesk', 'sans-serif'],
+              urdu: ['Noto Nastaliq Urdu', 'serif'],
             },
           },
         },
@@ -49,6 +51,7 @@
       ::-webkit-scrollbar-track { background: #090d16; }
       ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
       ::-webkit-scrollbar-thumb:hover { background: #334155; }
+      .font-nastaliq { font-family: 'Noto Nastaliq Urdu', serif; line-height: 1.8; }
       .glass-panel {
         background: rgba(15, 23, 42, 0.75);
         backdrop-filter: blur(12px);
@@ -56,84 +59,105 @@
       }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white">
+  <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-white">
     <div id="root"></div>
 
     <script type="text/babel">
       const { useState, useEffect, createContext, useContext } = React;
 
-      // Initialize Supabase Client Safely
-      const SUPABASE_URL = 'https://demo-factoryflow.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY3MjUxMjAwMCwiZXhwIjoyMDE4MDg4MDAwfQ.demo-key';
-      let supabase = null;
-      try {
-        if (window.supabase) {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      // Translations Dictionary (English & Urdu)
+      const translations = {
+        en: {
+          appName: 'Muhammad Daal & Grain Factory',
+          location: 'Chak 230 RB Chohla, Jhang Road, Faisalabad',
+          dashboard: 'Dashboard - خلاصہ',
+          daybook: 'Day-Book - روزنامچہ',
+          workers: 'Workers - کارکنان',
+          purchase: 'Purchase - خرید',
+          sale: 'Sale - فروخت',
+          parties: 'Parties - پارٹیز',
+          products: 'Products - اشیاء',
+          stock: 'Stock - مال / کھاتہ',
+          gatepass: 'Gate Pass - گیٹ پاس',
+          reports: 'Reports - رپورٹس',
+          settings: 'Settings - ترتیب',
+          cashBalance: 'Current Cash Balance - Roznamcha',
+          cashBalanceUrdu: 'موجودہ روکڑ',
+          receivable: 'Receivable',
+          receivableUrdu: 'وصولی',
+          payable: 'Payable',
+          payableUrdu: 'ادائیگی',
+          stockTitle: 'Stock Balance',
+          stockUrdu: 'اسٹاک / مال',
+          noOverdue: 'کوئی واجب الادا بل نہیں (No Overdue Bills)',
+          overdueBills: 'Overdue Bills',
+          totalOverdue: 'Total Overdue Amount',
+          netReceivable: 'Net Receivable',
+          netPayable: 'Net Payable',
+          purchasesIn: 'Total Purchases In (کل خرید)',
+          salesOut: 'Total Sales Out (کل فروخت)',
+          plantTelemetry: 'Plant Machinery Live Telemetry (مشینری صورتحال)',
+          auditLogs: 'System Audit Logs (روزنامچہ اندراج)',
+        },
+        ur: {
+          appName: 'محمد دال اینڈ گرین فیکٹری',
+          location: 'چک 230 آر بی چوہلہ، جھنگ روڈ فیصل آباد',
+          dashboard: 'خلاصہ (Dashboard)',
+          daybook: 'روزنامچہ (Day-Book)',
+          workers: 'کارکنان (Workers)',
+          purchase: 'خرید (Purchase)',
+          sale: 'فروخت (Sale)',
+          parties: 'پارٹیز (Parties)',
+          products: 'اشیاء (Products)',
+          stock: 'مال / کھاتہ (Stock)',
+          gatepass: 'گیٹ پاس (Gate Pass)',
+          reports: 'رپورٹس (Reports)',
+          settings: 'ترتیب (Settings)',
+          cashBalance: 'موجودہ روکڑ - روزنامچہ',
+          cashBalanceUrdu: 'موجودہ روکڑ',
+          receivable: 'وصولی (Receivable)',
+          receivableUrdu: 'وصولی',
+          payable: 'ادائیگی (Payable)',
+          payableUrdu: 'ادائیگی',
+          stockTitle: 'اسٹاک بیلنس',
+          stockUrdu: 'اسٹاک',
+          noOverdue: 'کوئی واجب الادا بل نہیں',
+          overdueBills: 'واجب الادا بل',
+          totalOverdue: 'کل واجب الادا رقم',
+          netReceivable: 'خالص وصولی',
+          netPayable: 'خالص ادائیگی',
+          purchasesIn: 'کل خرید (Purchases In)',
+          salesOut: 'کل فروخت (Sales Out)',
+          plantTelemetry: 'مشینری کی صورتحال (Live Telemetry)',
+          auditLogs: 'سسٹم روزنامچہ اندراج (Audit Logs)',
         }
-      } catch (e) {
-        console.warn('Supabase initialization fallback active');
-      }
-
-      // App Components
-      const StatCard = ({ title, value, subtitle, iconName, trend, isPositive = true, color = 'sky' }) => {
-        const colorMap = {
-          sky: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-          emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-          amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-          purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        };
-
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{title}</span>
-              <div className={`p-2.5 rounded-lg border ${colorMap[color] || colorMap.sky}`}>
-                <i data-lucide={iconName} className="w-5 h-5"></i>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <h3 className="text-2xl font-bold text-slate-100 font-display">{value}</h3>
-            </div>
-
-            {(subtitle || trend) && (
-              <div className="mt-3 flex items-center gap-2 text-xs">
-                {trend && (
-                  <span className={`inline-flex items-center font-bold px-1.5 py-0.5 rounded ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                    {trend}
-                  </span>
-                )}
-                {subtitle && <span className="text-slate-400">{subtitle}</span>}
-              </div>
-            )}
-          </div>
-        );
       };
 
-      const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
+      const Sidebar = ({ activeTab, setActiveTab, lang, setLang, user, onLogout }) => {
+        const t = translations[lang];
+
         const navItems = [
-          { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-          { id: 'factories', label: 'Factories & Plants', icon: 'building-2' },
-          { id: 'inventory', label: 'Inventory & Stock', icon: 'boxes' },
-          { id: 'production', label: 'Production Work Orders', icon: 'cpu' },
-          { id: 'quality', label: 'Quality Control', icon: 'check-circle-2' },
-          { id: 'suppliers', label: 'Suppliers & Purchasing', icon: 'truck' },
-          { id: 'sales', label: 'Sales Orders', icon: 'shopping-bag' },
-          { id: 'workforce', label: 'Workforce & Payroll', icon: 'users' },
-          { id: 'reports', label: 'Analytics & Reports', icon: 'bar-chart-3' },
-          { id: 'audit', label: 'Audit Logs', icon: 'shield-check' },
-          { id: 'settings', label: 'Settings', icon: 'settings' },
+          { id: 'dashboard', label: t.dashboard, icon: 'layout-dashboard' },
+          { id: 'daybook', label: t.daybook, icon: 'book-open' },
+          { id: 'workers', label: t.workers, icon: 'users' },
+          { id: 'purchase', label: t.purchase, icon: 'shopping-cart' },
+          { id: 'sale', label: t.sale, icon: 'trending-up' },
+          { id: 'parties', label: t.parties, icon: 'user-check' },
+          { id: 'products', label: t.products, icon: 'package' },
+          { id: 'stock', label: t.stock, icon: 'boxes' },
+          { id: 'gatepass', label: t.gatepass, icon: 'ticket' },
+          { id: 'reports', label: t.reports, icon: 'bar-chart-3' },
         ];
 
         return (
           <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0 z-30">
             <div className="p-5 border-b border-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-sky-600 rounded-lg text-white shadow-lg shadow-sky-600/30">
+              <div className="p-2 bg-amber-600 rounded-lg text-white shadow-lg shadow-amber-600/30">
                 <i data-lucide="factory" className="w-6 h-6"></i>
               </div>
               <div>
-                <h1 className="font-display font-bold text-lg text-slate-100 tracking-tight">FactoryFlow</h1>
-                <p className="text-xs text-slate-400 font-medium">Enterprise ERP</p>
+                <h1 className="font-display font-bold text-base text-amber-400 tracking-tight leading-tight">{t.appName}</h1>
+                <p className="text-[11px] text-slate-400 font-medium truncate">{t.location}</p>
               </div>
             </div>
 
@@ -144,29 +168,40 @@
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                      isActive ? 'bg-sky-600/15 text-sky-400 border border-sky-500/30 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      isActive ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                     }`}
                   >
-                    <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-slate-400'}`}></i>
-                    <span>{item.label}</span>
+                    <div className="flex items-center gap-3">
+                      <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`}></i>
+                      <span className={lang === 'ur' ? 'font-nastaliq text-sm' : ''}>{item.label}</span>
+                    </div>
                   </button>
                 );
               })}
             </nav>
 
-            <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-              <div className="flex items-center justify-between">
+            <div className="p-4 border-t border-slate-800 bg-slate-900/50 space-y-3">
+              {/* Language Switcher Button */}
+              <button
+                onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
+                className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+              >
+                <i data-lucide="languages" className="w-4 h-4"></i>
+                <span>{lang === 'en' ? 'اردو زبان منتخب کریں (Switch to Urdu)' : 'Switch to English'}</span>
+              </button>
+
+              <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-9 h-9 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-sm border border-sky-500/30">
-                    {user?.name?.[0] || 'S'}
+                  <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/30">
+                    A
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-sm font-semibold text-slate-200 truncate">{user?.name || 'Sarah Jenkins'}</p>
-                    <p className="text-xs text-slate-400 truncate">{user?.role || 'Super Manager'}</p>
+                    <p className="text-xs font-semibold text-slate-200 truncate">Abdullah Dilbar</p>
+                    <p className="text-[10px] text-slate-400 truncate">Proprietor / Admin</p>
                   </div>
                 </div>
-                <button onClick={onLogout} className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" title="Sign Out">
+                <button onClick={onLogout} className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" title="Sign Out">
                   <i data-lucide="log-out" className="w-4 h-4"></i>
                 </button>
               </div>
@@ -175,345 +210,242 @@
         );
       };
 
-      const Header = ({ title, subtitle }) => {
+      const Header = ({ lang, setLang }) => {
+        const t = translations[lang];
         return (
           <header className="h-16 bg-slate-900/80 backdrop-blur border-b border-slate-800 px-6 flex items-center justify-between sticky top-0 z-20">
             <div>
-              <h2 className="text-lg font-bold text-slate-100 font-display">{title}</h2>
-              {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+              <h2 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2">
+                <span>{t.appName}</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-normal">Faisalabad, Pakistan</span>
+              </h2>
+              <p className="text-xs text-slate-400">{t.location}</p>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
                 <i data-lucide="radio" className="w-3.5 h-3.5 animate-pulse"></i>
-                <span>Supabase Cloud Sync</span>
+                <span>Supabase Live Cloud Database</span>
               </div>
 
-              <div className="relative hidden md:block">
-                <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                <input
-                  type="text"
-                  placeholder="Search work orders, SKUs..."
-                  className="w-64 bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
-                />
-              </div>
-
-              <button className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg relative transition-colors">
-                <i data-lucide="bell" className="w-4 h-4"></i>
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-sky-500 rounded-full"></span>
+              <button
+                onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
+                className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
+              >
+                <i data-lucide="languages" className="w-4 h-4"></i>
+                <span>{lang === 'en' ? 'اردو (Urdu)' : 'English'}</span>
               </button>
             </div>
           </header>
         );
       };
 
-      const DashboardView = () => (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Overall Plant OEE" value="87.4%" subtitle="Target: 85.0%" trend="+2.4%" iconName="gauge" color="sky" />
-            <StatCard title="Active Work Orders" value="42 Orders" subtitle="8 On-time Schedule" trend="+5 Today" iconName="clipboard-list" color="emerald" />
-            <StatCard title="Raw Stock Value" value="$1,248,500" subtitle="12 Low stock alerts" trend="-1.2%" isPositive={false} iconName="boxes" color="amber" />
-            <StatCard title="Quality Pass Rate" value="99.1%" subtitle="3 Defect reports" trend="+0.4%" iconName="check-circle-2" color="purple" />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <i data-lucide="cpu" className="w-5 h-5 text-sky-400"></i>
-                  <h3 className="font-semibold text-slate-100 font-display">Plant Machinery Live Telemetry</h3>
-                </div>
-                <span className="text-xs text-slate-400">4 Stations Active</span>
-              </div>
-
-              <div className="mt-4 divide-y divide-slate-800/60">
-                {[
-                  { name: 'CNC Milling Station A1', status: 'Operational', note: '98% efficiency rate', color: 'emerald' },
-                  { name: 'Hydraulic Press Unit B', status: 'Maintenance', note: 'Scheduled calibration', color: 'amber' },
-                  { name: 'Automated Assembly Line C', status: 'Operational', note: '100% efficiency rate', color: 'emerald' },
-                  { name: 'Robotic Welding Cell 4', status: 'Idle Queue', note: 'Awaiting batch assignment', color: 'sky' },
-                ].map((m, i) => (
-                  <div key={i} className="py-3.5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className={`w-2.5 h-2.5 rounded-full ${m.color === 'emerald' ? 'bg-emerald-400' : m.color === 'amber' ? 'bg-amber-400' : 'bg-sky-400'}`}></span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-200">{m.name}</p>
-                        <p className="text-xs text-slate-400">{m.note}</p>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${m.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : m.color === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-sky-500/10 text-sky-400 border-sky-500/30'}`}>
-                      {m.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <i data-lucide="history" className="w-5 h-5 text-sky-400"></i>
-                  <h3 className="font-semibold text-slate-100 font-display">System Audit Logs</h3>
-                </div>
-                <i data-lucide="shield-check" className="w-4 h-4 text-emerald-400"></i>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {[
-                  { action: 'Stock Dispatched', detail: '500 Units Aluminium Coils', time: '10 mins ago' },
-                  { action: 'Work Order Completed', detail: 'WO-2026-0099 Steel Frames', time: '25 mins ago' },
-                  { action: 'Maintenance Logged', detail: 'Oil Filter Change (Press B)', time: '1 hour ago' },
-                  { action: 'Quality Inspection', detail: 'Batch #881 Inspection Passed', time: '2 hours ago' },
-                ].map((log, i) => (
-                  <div key={i} className="flex items-start gap-3 text-xs">
-                    <i data-lucide="check-circle-2" className="w-4 h-4 text-sky-400 shrink-0 mt-0.5"></i>
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-200">{log.action}</p>
-                      <p className="text-slate-400">{log.detail}</p>
-                    </div>
-                    <span className="text-slate-500 shrink-0">{log.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-
-      const FactoriesView = () => (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold font-display text-slate-100">Enterprise Facilities</h3>
-              <p className="text-xs text-slate-400">Multi-location factory and plant configuration</p>
-            </div>
-            <button className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
-              <i data-lucide="plus" className="w-4 h-4"></i>
-              <span>Add Facility</span>
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              { name: 'Apex Manufacturing Facility #1', code: 'FAC-APEX-01', location: 'Detroit Industrial Corridor, MI', plants: '4 Plants', depts: '12 Departments' },
-              { name: 'High-Precision Robotics Plant #2', code: 'FAC-ROBO-02', location: 'Austin High-Tech Zone, TX', plants: '2 Plants', depts: '8 Departments' },
-              { name: 'Foundry & Heavy Metal Unit', code: 'FAC-MET-03', location: 'Cleveland Logistics Park, OH', plants: '3 Plants', depts: '9 Departments' },
-            ].map((fac, i) => (
-              <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
-                    <i data-lucide="building-2" className="w-6 h-6"></i>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h4 className="font-semibold text-slate-100 text-base">{fac.name}</h4>
-                      <span className="text-xs font-mono font-medium px-2 py-0.5 bg-slate-800 text-sky-400 rounded border border-slate-700">{fac.code}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
-                      <i data-lucide="map-pin" className="w-3.5 h-3.5"></i>
-                      <span>{fac.location}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-medium px-3 py-1 bg-sky-500/10 text-sky-400 rounded-lg border border-sky-500/20">{fac.plants}</span>
-                  <span className="text-xs font-medium px-3 py-1 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">{fac.depts}</span>
-                  <i data-lucide="chevron-right" className="w-5 h-5 text-slate-500"></i>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-
-      const InventoryView = () => (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold font-display text-slate-100">Inventory & Warehouse Stock</h3>
-              <p className="text-xs text-slate-400">Real-time stock level monitoring across warehouses</p>
-            </div>
-            <button className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
-              <i data-lucide="arrow-up-right" className="w-4 h-4"></i>
-              <span>Log Stock Movement</span>
-            </button>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="p-4">SKU Code</th>
-                    <th className="p-4">Item Name</th>
-                    <th className="p-4">Category</th>
-                    <th className="p-4">Current Stock</th>
-                    <th className="p-4">Unit Cost</th>
-                    <th className="p-4 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-xs">
-                  {[
-                    { sku: 'RM-ALU-001', name: 'High-Grade Aluminium Sheets (3mm)', cat: 'Raw Material', stock: '4,250 SQM', status: 'Optimal', cost: '$48.50' },
-                    { sku: 'RM-STL-009', name: 'Structural Steel Rods 12mm', cat: 'Raw Material', stock: '850 Tons', status: 'Low Stock', cost: '$620.00' },
-                    { sku: 'FG-GEAR-88', name: 'Industrial Planetary Gearbox V2', cat: 'Finished Good', stock: '140 Units', status: 'Optimal', cost: '$1,450.00' },
-                    { sku: 'FG-VALVE-12', name: 'High-Pressure Pneumatic Valve', cat: 'Finished Good', stock: '620 Units', status: 'Optimal', cost: '$185.00' },
-                  ].map((item, i) => (
-                    <tr key={i} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-mono font-bold text-sky-400">{item.sku}</td>
-                      <td className="p-4 font-semibold text-slate-200">{item.name}</td>
-                      <td className="p-4 text-slate-400">{item.cat}</td>
-                      <td className="p-4 font-bold text-slate-100">{item.stock}</td>
-                      <td className="p-4 text-slate-300">{item.cost}</td>
-                      <td className="p-4 text-right">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${item.status === 'Low Stock' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-
-      const ProductionView = () => (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold font-display text-slate-100">Production & Work Orders</h3>
-              <p className="text-xs text-slate-400">Track job scheduling, execution status, and plant output</p>
-            </div>
-            <button className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
-              <i data-lucide="plus" className="w-4 h-4"></i>
-              <span>Create Work Order</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              { id: 'WO-2026-0881', product: 'Planetary Gearbox Assembly V2', qty: '500 Units', plant: 'Plant #1 - Machining', status: 'In Progress', progress: 65 },
-              { id: 'WO-2026-0882', product: 'Custom Aluminium Enclosure B', qty: '1,200 Units', plant: 'Plant #2 - Fabrication', status: 'Approved', progress: 10 },
-              { id: 'WO-2026-0883', product: 'Heavy Duty Shaft Couplings', qty: '2,500 Units', plant: 'Plant #3 - Foundry', status: 'Completed', progress: 100 },
-            ].map((wo, i) => (
-              <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-sky-400 text-base">{wo.id}</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">{wo.plant}</span>
-                  </div>
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${wo.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : wo.status === 'In Progress' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
-                    {wo.status}
-                  </span>
-                </div>
-
-                <div className="mt-3">
-                  <h4 className="font-semibold text-slate-100 text-sm">{wo.product}</h4>
-                  <p className="text-xs text-slate-400 mt-0.5">Quantity: {wo.qty}</p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-800">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-slate-400 font-medium">Job Completion</span>
-                    <span className="font-bold text-sky-400">{wo.progress}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
-                    <div className="h-full bg-sky-500 rounded-full" style={{ width: `${wo.progress}%` }}></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-
-      const LoginView = ({ onLogin }) => {
-        const [email, setEmail] = useState('admin@factoryflow.com');
-        const [password, setPassword] = useState('password123');
+      const DashboardView = ({ lang }) => {
+        const t = translations[lang];
 
         return (
-          <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
-              <div className="flex flex-col items-center text-center">
-                <div className="p-3 bg-sky-600 rounded-xl text-white shadow-lg shadow-sky-600/30 mb-4">
-                  <i data-lucide="factory" className="w-8 h-8"></i>
+          <div className="space-y-6">
+            {/* Top Heading */}
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">{lang === 'ur' ? 'خلاصہ' : 'خلاصہ - Dashboard Summary'}</h1>
+              <span className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg font-mono">
+                {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • 0300-0676293
+              </span>
+            </div>
+
+            {/* Current Cash Balance Card (Roznamcha) */}
+            <div className="bg-gradient-to-r from-amber-950/60 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/30">
+                    <i data-lucide="wallet" className="w-8 h-8"></i>
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-amber-300 font-nastaliq">{t.cashBalanceUrdu}</h2>
+                    <p className="text-xs text-slate-400 mt-1 font-medium">{t.cashBalance}</p>
+                  </div>
                 </div>
-                <h1 className="text-2xl font-bold font-display text-slate-100">FactoryFlow Pro</h1>
-                <p className="text-sm text-slate-400 mt-1">Enterprise Factory Management Portal</p>
+                <div className="text-right">
+                  <span className="text-4xl font-bold font-mono text-amber-400 tracking-tight">PKR 0</span>
+                  <p className="text-xs text-slate-400 mt-1">صفائی شدہ نقد رقم (Cash Balance)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Main Financial & Stock Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Receivable (وصولی) */}
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="arrow-down-circle" className="w-5 h-5 text-sky-400"></i>
+                    <h3 className="text-lg font-bold text-slate-100">{t.receivable}</h3>
+                  </div>
+                  <span className="text-sm font-bold text-sky-400 font-nastaliq">{t.receivableUrdu}</span>
+                </div>
+
+                <div className="mt-4 space-y-3 text-xs">
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.overdueBills}</span>
+                    <span className="font-mono font-bold text-slate-200">0</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.totalOverdue}</span>
+                    <span className="font-mono font-bold text-slate-200">0</span>
+                  </div>
+                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
+                    <span>{t.netReceivable}</span>
+                    <span className="font-mono text-sky-400">0</span>
+                  </div>
+                  <div className="mt-4 p-3 bg-slate-950 rounded-lg text-center text-slate-500 font-nastaliq">
+                    {t.noOverdue}
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); onLogin(email); }} className="mt-8 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Work Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
-                  />
+              {/* Payable (ادائیگی) */}
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="arrow-up-circle" className="w-5 h-5 text-amber-400"></i>
+                    <h3 className="text-lg font-bold text-slate-100">{t.payable}</h3>
+                  </div>
+                  <span className="text-sm font-bold text-amber-400 font-nastaliq">{t.payableUrdu}</span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500"
-                  />
+                <div className="mt-4 space-y-3 text-xs">
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.overdueBills}</span>
+                    <span className="font-mono font-bold text-slate-200">0</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.totalOverdue}</span>
+                    <span className="font-mono font-bold text-slate-200">0</span>
+                  </div>
+                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
+                    <span>{t.netPayable}</span>
+                    <span className="font-mono text-amber-400">0</span>
+                  </div>
+                  <div className="mt-4 p-3 bg-slate-950 rounded-lg text-center text-slate-500 font-nastaliq">
+                    {t.noOverdue}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stock Balance (اسٹاک) */}
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="boxes" className="w-5 h-5 text-emerald-400"></i>
+                    <h3 className="text-lg font-bold text-slate-100">{t.stockTitle}</h3>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400 font-nastaliq">{t.stockUrdu}</span>
                 </div>
 
-                <button type="submit" className="w-full mt-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 px-4 rounded-lg transition-all shadow-lg shadow-sky-600/25">
-                  Sign In to System
-                </button>
-              </form>
+                <div className="mt-4 space-y-3 text-xs">
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.purchasesIn}</span>
+                    <span className="font-mono font-bold text-slate-200">0</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>{t.salesOut}</span>
+                    <span className="font-mono font-bold text-slate-200">-0</span>
+                  </div>
+                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
+                    <span>Stock Balance (موجودہ اسٹاک)</span>
+                    <span className="font-mono text-emerald-400">0 Bags</span>
+                  </div>
+                  <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center text-emerald-400 font-semibold">
+                    اسٹاک کھاتہ بالکل محفوظ ہے (Stock Balanced)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Plant Machinery & Audit Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="cpu" className="w-5 h-5 text-amber-400"></i>
+                    <h3 className="font-semibold text-slate-100 font-display">{t.plantTelemetry}</h3>
+                  </div>
+                  <span className="text-xs text-slate-400">فیکٹری پلانٹس (4 Stations)</span>
+                </div>
+
+                <div className="mt-4 divide-y divide-slate-800/60">
+                  {[
+                    { name: 'چنا دال پروسیسنگ پلانٹ A1 (Chana Daal Unit)', status: 'فعال (Operational)', note: '98% کارکردگی', color: 'emerald' },
+                    { name: 'مونگ دال پالشنگ یونٹ B (Moong Polisher)', status: 'ترمیم (Maintenance)', note: 'شیڈول کیلیبریشن', color: 'amber' },
+                    { name: 'مسور دال پیکنگ سیشن C (Packing Line)', status: 'فعال (Operational)', note: '100% کارکردگی', color: 'emerald' },
+                    { name: 'آٹومیٹک گریڈر اینڈ ڈسٹ کلینر 4', status: 'متبادل (Idle Queue)', note: 'بیچ انتظار', color: 'sky' },
+                  ].map((m, i) => (
+                    <div key={i} className="py-3.5 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-2.5 h-2.5 rounded-full ${m.color === 'emerald' ? 'bg-emerald-400' : m.color === 'amber' ? 'bg-amber-400' : 'bg-sky-400'}`}></span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200 font-nastaliq">{m.name}</p>
+                          <p className="text-xs text-slate-400">{m.note}</p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${m.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : m.color === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-sky-500/10 text-sky-400 border-sky-500/30'}`}>
+                        {m.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="history" className="w-5 h-5 text-amber-400"></i>
+                    <h3 className="font-semibold text-slate-100 font-display">{t.auditLogs}</h3>
+                  </div>
+                  <i data-lucide="shield-check" className="w-4 h-4 text-emerald-400"></i>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {[
+                    { action: 'خرید دال چنا (Raw Pulse Purchase)', detail: '500 بوریاں وصول کی گئیں (500 Bags)', time: '10 منٹ پہلے' },
+                    { action: 'فروخت مسور (Sales Gatepass)', detail: 'گیٹ پاس #2099 جاری ہوا', time: '25 منٹ پہلے' },
+                    { action: 'کارکنان حاضری (Workers Attendance)', detail: 'شفت B کی حاضری مکمل', time: '1 گھنٹہ پہلے' },
+                    { action: 'معائنہ معیار (Quality Inspection)', detail: 'بیچ #881 معیار پاس ہوا', time: '2 گھنٹے پہلے' },
+                  ].map((log, i) => (
+                    <div key={i} className="flex items-start gap-3 text-xs">
+                      <i data-lucide="check-circle-2" className="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                      <div className="flex-1">
+                        <p className="font-semibold text-slate-200 font-nastaliq">{log.action}</p>
+                        <p className="text-slate-400">{log.detail}</p>
+                      </div>
+                      <span className="text-slate-500 shrink-0">{log.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         );
       };
 
       const App = () => {
-        const [user, setUser] = useState({ name: 'Sarah Jenkins', role: 'Super Manager', email: 'admin@factoryflow.com' });
+        const [lang, setLang] = useState('ur'); // Default to Urdu & English bilingual mode
         const [activeTab, setActiveTab] = useState('dashboard');
+        const [user, setUser] = useState({ name: 'Abdullah Dilbar', role: 'Proprietor', email: 'admin@factoryflow.com' });
 
         useEffect(() => {
           if (window.lucide) {
             window.lucide.createIcons();
           }
-        }, [activeTab, user]);
-
-        if (!user) {
-          return <LoginView onLogin={(e) => setUser({ name: 'Sarah Jenkins', role: 'Super Manager', email: e })} />;
-        }
-
-        const getHeaderInfo = () => {
-          switch (activeTab) {
-            case 'dashboard': return { title: 'Executive Dashboard', subtitle: 'Real-time overview across operational plants & stock' };
-            case 'factories': return { title: 'Factories & Plants', subtitle: 'Multi-facility processing units' };
-            case 'inventory': return { title: 'Inventory & Stock', subtitle: 'Raw material and finished goods tracking' };
-            case 'production': return { title: 'Production Planning', subtitle: 'Work order scheduling and telemetry' };
-            default: return { title: 'FactoryFlow Pro', subtitle: 'Enterprise ERP Portal' };
-          }
-        };
-
-        const headerInfo = getHeaderInfo();
+        }, [activeTab, lang]);
 
         return (
           <div className="flex min-h-screen bg-slate-950 text-slate-100">
-            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={() => setUser(null)} />
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} lang={lang} setLang={setLang} user={user} onLogout={() => alert('Logged out')} />
             <div className="flex-1 flex flex-col min-w-0">
-              <Header title={headerInfo.title} subtitle={headerInfo.subtitle} />
+              <Header lang={lang} setLang={setLang} />
               <main className="flex-1 p-6 overflow-y-auto">
-                {activeTab === 'dashboard' && <DashboardView />}
-                {activeTab === 'factories' && <FactoriesView />}
-                {activeTab === 'inventory' && <InventoryView />}
-                {activeTab === 'production' && <ProductionView />}
-                {['quality', 'suppliers', 'sales', 'workforce', 'reports', 'audit', 'settings'].includes(activeTab) && <DashboardView />}
+                <DashboardView lang={lang} />
               </main>
             </div>
           </div>
