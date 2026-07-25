@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FactoryFlow Pro - Enterprise Factory Management System (اردو / English)</title>
+    <title>Muhammad Daal Factory - Enterprise Factory Management System</title>
     
     <!-- Modern Typography: Inter + Space Grotesk + Noto Nastaliq Urdu -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,13 +19,21 @@
           extend: {
             colors: {
               brand: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                500: '#0284c7',
-                600: '#0369a1',
-                700: '#075985',
+                50: '#fffbe6',
+                100: '#fff3b3',
+                500: '#f59e0b',
+                600: '#d97706',
+                700: '#b45309',
+                800: '#92400e',
+                900: '#78350f',
               },
-              amberBrand: '#d97706',
+              dark: {
+                950: '#0b0f19',
+                900: '#121726',
+                850: '#182033',
+                800: '#1f2942',
+                750: '#283554',
+              }
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
@@ -42,412 +50,888 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Lucide Icons & Supabase SDK -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #090d16; }
-      ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #334155; }
-      .font-nastaliq { font-family: 'Noto Nastaliq Urdu', serif; line-height: 1.8; }
-      .glass-panel {
-        background: rgba(15, 23, 42, 0.75);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(51, 65, 85, 0.5);
-      }
+      ::-webkit-scrollbar-track { background: #0b0f19; }
+      ::-webkit-scrollbar-thumb { background: #1f2942; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+      .font-nastaliq { font-family: 'Noto Nastaliq Urdu', serif; line-height: 1.9; }
+      .glow-amber { box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.3); }
+      .glow-card { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5); }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-white">
+  <body class="bg-dark-950 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-black">
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useState, useEffect, createContext, useContext } = React;
+      const { useState, useEffect } = React;
 
-      // Translations Dictionary (English & Urdu)
-      const translations = {
-        en: {
-          appName: 'Muhammad Daal & Grain Factory',
-          location: 'Chak 230 RB Chohla, Jhang Road, Faisalabad',
-          dashboard: 'Dashboard - خلاصہ',
-          daybook: 'Day-Book - روزنامچہ',
-          workers: 'Workers - کارکنان',
-          purchase: 'Purchase - خرید',
-          sale: 'Sale - فروخت',
-          parties: 'Parties - پارٹیز',
-          products: 'Products - اشیاء',
-          stock: 'Stock - مال / کھاتہ',
-          gatepass: 'Gate Pass - گیٹ پاس',
-          reports: 'Reports - رپورٹس',
-          settings: 'Settings - ترتیب',
-          cashBalance: 'Current Cash Balance - Roznamcha',
-          cashBalanceUrdu: 'موجودہ روکڑ',
-          receivable: 'Receivable',
-          receivableUrdu: 'وصولی',
-          payable: 'Payable',
-          payableUrdu: 'ادائیگی',
-          stockTitle: 'Stock Balance',
-          stockUrdu: 'اسٹاک / مال',
-          noOverdue: 'کوئی واجب الادا بل نہیں (No Overdue Bills)',
-          overdueBills: 'Overdue Bills',
-          totalOverdue: 'Total Overdue Amount',
-          netReceivable: 'Net Receivable',
-          netPayable: 'Net Payable',
-          purchasesIn: 'Total Purchases In (کل خرید)',
-          salesOut: 'Total Sales Out (کل فروخت)',
-          plantTelemetry: 'Plant Machinery Live Telemetry (مشینری صورتحال)',
-          auditLogs: 'System Audit Logs (روزنامچہ اندراج)',
-        },
-        ur: {
-          appName: 'محمد دال اینڈ گرین فیکٹری',
-          location: 'چک 230 آر بی چوہلہ، جھنگ روڈ فیصل آباد',
-          dashboard: 'خلاصہ (Dashboard)',
-          daybook: 'روزنامچہ (Day-Book)',
-          workers: 'کارکنان (Workers)',
-          purchase: 'خرید (Purchase)',
-          sale: 'فروخت (Sale)',
-          parties: 'پارٹیز (Parties)',
-          products: 'اشیاء (Products)',
-          stock: 'مال / کھاتہ (Stock)',
-          gatepass: 'گیٹ پاس (Gate Pass)',
-          reports: 'رپورٹس (Reports)',
-          settings: 'ترتیب (Settings)',
-          cashBalance: 'موجودہ روکڑ - روزنامچہ',
-          cashBalanceUrdu: 'موجودہ روکڑ',
-          receivable: 'وصولی (Receivable)',
-          receivableUrdu: 'وصولی',
-          payable: 'ادائیگی (Payable)',
-          payableUrdu: 'ادائیگی',
-          stockTitle: 'اسٹاک بیلنس',
-          stockUrdu: 'اسٹاک',
-          noOverdue: 'کوئی واجب الادا بل نہیں',
-          overdueBills: 'واجب الادا بل',
-          totalOverdue: 'کل واجب الادا رقم',
-          netReceivable: 'خالص وصولی',
-          netPayable: 'خالص ادائیگی',
-          purchasesIn: 'کل خرید (Purchases In)',
-          salesOut: 'کل فروخت (Sales Out)',
-          plantTelemetry: 'مشینری کی صورتحال (Live Telemetry)',
-          auditLogs: 'سسٹم روزنامچہ اندراج (Audit Logs)',
-        }
-      };
+      // Initial Seed Data for Complete Interactive Functionality
+      const initialRoznamcha = [
+        { id: 'ROZ-101', date: '2026-07-25', party: 'Haji Aslam Grain Supplier', description: 'Chana Pulse 200 Bags Advance Payment', type: 'Cash Paid', amount: 150000, voucher: 'V-8801' },
+        { id: 'ROZ-102', date: '2026-07-25', party: 'Faisalabad Traders', description: 'Daal Moong Sale Receipt', type: 'Cash Received', amount: 280000, voucher: 'V-8802' },
+        { id: 'ROZ-103', date: '2026-07-24', party: 'Chaudhry Transport', description: 'Truck Gatepass Freight Charges', type: 'Cash Paid', amount: 25000, voucher: 'V-8803' },
+      ];
 
-      const Sidebar = ({ activeTab, setActiveTab, lang, setLang, user, onLogout }) => {
-        const t = translations[lang];
+      const initialWorkers = [
+        { id: 'WRK-01', name: 'Muhammad Ramzan', role: 'Chief Mill Operator', shift: 'Day Shift', dailyWage: 2500, attendance: 'Present', status: 'Paid' },
+        { id: 'WRK-02', name: 'Tariq Mehmood', role: 'Packaging Incharge', shift: 'Day Shift', dailyWage: 2000, attendance: 'Present', status: 'Pending' },
+        { id: 'WRK-03', name: 'Shahid Iqbal', role: 'Gate Inspector', shift: 'Night Shift', dailyWage: 1800, attendance: 'Present', status: 'Paid' },
+        { id: 'WRK-04', name: 'Allah Ditta', role: 'Loading Loader', shift: 'Day Shift', dailyWage: 1600, attendance: 'Absent', status: 'Unpaid' },
+      ];
 
-        const navItems = [
-          { id: 'dashboard', label: t.dashboard, icon: 'layout-dashboard' },
-          { id: 'daybook', label: t.daybook, icon: 'book-open' },
-          { id: 'workers', label: t.workers, icon: 'users' },
-          { id: 'purchase', label: t.purchase, icon: 'shopping-cart' },
-          { id: 'sale', label: t.sale, icon: 'trending-up' },
-          { id: 'parties', label: t.parties, icon: 'user-check' },
-          { id: 'products', label: t.products, icon: 'package' },
-          { id: 'stock', label: t.stock, icon: 'boxes' },
-          { id: 'gatepass', label: t.gatepass, icon: 'ticket' },
-          { id: 'reports', label: t.reports, icon: 'bar-chart-3' },
-        ];
+      const initialPurchases = [
+        { id: 'PUR-501', supplier: 'Haji Aslam Grain Co', item: 'Raw Chana Pulse', bags: 500, ratePerMaund: 6800, total: 3400000, date: '2026-07-25', status: 'Received' },
+        { id: 'PUR-502', supplier: 'Sargodha Agricultural Mills', item: 'Raw Moong Pulse', bags: 300, ratePerMaund: 7400, total: 2220000, date: '2026-07-24', status: 'In Transit' },
+      ];
 
-        return (
-          <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0 z-30">
-            <div className="p-5 border-b border-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-amber-600 rounded-lg text-white shadow-lg shadow-amber-600/30">
-                <i data-lucide="factory" className="w-6 h-6"></i>
-              </div>
-              <div>
-                <h1 className="font-display font-bold text-base text-amber-400 tracking-tight leading-tight">{t.appName}</h1>
-                <p className="text-[11px] text-slate-400 font-medium truncate">{t.location}</p>
-              </div>
-            </div>
+      const initialSales = [
+        { id: 'INV-901', customer: 'Faisalabad Wholesale Traders', item: 'Processed Daal Chana (A-Grade)', bags: 250, rate: 8200, total: 2050000, date: '2026-07-25', status: 'Delivered' },
+        { id: 'INV-902', customer: 'Lahore Grocery Supermarket', item: 'Polished Daal Moong', bags: 150, rate: 9100, total: 1365000, date: '2026-07-24', status: 'Dispatched' },
+      ];
 
-            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-              {navItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                      isActive ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`}></i>
-                      <span className={lang === 'ur' ? 'font-nastaliq text-sm' : ''}>{item.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
+      const initialParties = [
+        { id: 'PRT-01', name: 'Haji Aslam Grain Supplier', category: 'Supplier', city: 'Sargodha', phone: '0300-6543210', balance: 450000, type: 'Payable' },
+        { id: 'PRT-02', name: 'Faisalabad Traders', category: 'Customer', city: 'Faisalabad', phone: '0313-9876543', balance: 820000, type: 'Receivable' },
+        { id: 'PRT-03', name: 'Chaudhry Transport Co', category: 'Transporter', city: 'Faisalabad', phone: '0321-4455667', balance: 35000, type: 'Payable' },
+      ];
 
-            <div className="p-4 border-t border-slate-800 bg-slate-900/50 space-y-3">
-              {/* Language Switcher Button */}
-              <button
-                onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
-                className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors"
-              >
-                <i data-lucide="languages" className="w-4 h-4"></i>
-                <span>{lang === 'en' ? 'اردو زبان منتخب کریں (Switch to Urdu)' : 'Switch to English'}</span>
-              </button>
+      const initialProducts = [
+        { sku: 'PROD-CHANA-A', name: 'Daal Chana Special (دال چنا)', bagWeight: '50 KG', stockBags: 1250, rate: 8200, category: 'Finished Goods' },
+        { sku: 'PROD-MOONG-P', name: 'Daal Moong Polished (دال مونگ)', bagWeight: '50 KG', stockBags: 840, rate: 9100, category: 'Finished Goods' },
+        { sku: 'PROD-MASOOR-W', name: 'Daal Masoor Whole (دال مسور)', bagWeight: '50 KG', stockBags: 620, rate: 7800, category: 'Finished Goods' },
+        { sku: 'PROD-CHANA-RAW', name: 'Raw Unprocessed Chana (کچی چنا)', bagWeight: '100 KG', stockBags: 3400, rate: 6800, category: 'Raw Materials' },
+      ];
 
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/30">
-                    A
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-xs font-semibold text-slate-200 truncate">Abdullah Dilbar</p>
-                    <p className="text-[10px] text-slate-400 truncate">Proprietor / Admin</p>
-                  </div>
-                </div>
-                <button onClick={onLogout} className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" title="Sign Out">
-                  <i data-lucide="log-out" className="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-          </aside>
-        );
-      };
+      const initialGatePasses = [
+        { id: 'GP-4001', truckNo: 'FSD-7892', driver: 'Rashid Khan', type: 'Outward Sale', goods: '250 Bags Daal Chana', netWeight: '12,500 KG', time: '04:30 PM', status: 'Passed' },
+        { id: 'GP-4002', truckNo: 'SGD-4410', driver: 'Kashif Ali', type: 'Inward Purchase', goods: '500 Bags Raw Pulse', netWeight: '50,000 KG', time: '01:15 PM', status: 'Cleared' },
+      ];
 
-      const Header = ({ lang, setLang }) => {
-        const t = translations[lang];
-        return (
-          <header className="h-16 bg-slate-900/80 backdrop-blur border-b border-slate-800 px-6 flex items-center justify-between sticky top-0 z-20">
-            <div>
-              <h2 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2">
-                <span>{t.appName}</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-normal">Faisalabad, Pakistan</span>
-              </h2>
-              <p className="text-xs text-slate-400">{t.location}</p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
-                <i data-lucide="radio" className="w-3.5 h-3.5 animate-pulse"></i>
-                <span>Supabase Live Cloud Database</span>
-              </div>
-
-              <button
-                onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
-                className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
-              >
-                <i data-lucide="languages" className="w-4 h-4"></i>
-                <span>{lang === 'en' ? 'اردو (Urdu)' : 'English'}</span>
-              </button>
-            </div>
-          </header>
-        );
-      };
-
-      const DashboardView = ({ lang }) => {
-        const t = translations[lang];
-
-        return (
-          <div className="space-y-6">
-            {/* Top Heading */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">{lang === 'ur' ? 'خلاصہ' : 'خلاصہ - Dashboard Summary'}</h1>
-              <span className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg font-mono">
-                {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • 0300-0676293
-              </span>
-            </div>
-
-            {/* Current Cash Balance Card (Roznamcha) */}
-            <div className="bg-gradient-to-r from-amber-950/60 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-4 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/30">
-                    <i data-lucide="wallet" className="w-8 h-8"></i>
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-amber-300 font-nastaliq">{t.cashBalanceUrdu}</h2>
-                    <p className="text-xs text-slate-400 mt-1 font-medium">{t.cashBalance}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-4xl font-bold font-mono text-amber-400 tracking-tight">PKR 0</span>
-                  <p className="text-xs text-slate-400 mt-1">صفائی شدہ نقد رقم (Cash Balance)</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 3 Main Financial & Stock Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Receivable (وصولی) */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <i data-lucide="arrow-down-circle" className="w-5 h-5 text-sky-400"></i>
-                    <h3 className="text-lg font-bold text-slate-100">{t.receivable}</h3>
-                  </div>
-                  <span className="text-sm font-bold text-sky-400 font-nastaliq">{t.receivableUrdu}</span>
-                </div>
-
-                <div className="mt-4 space-y-3 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.overdueBills}</span>
-                    <span className="font-mono font-bold text-slate-200">0</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.totalOverdue}</span>
-                    <span className="font-mono font-bold text-slate-200">0</span>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
-                    <span>{t.netReceivable}</span>
-                    <span className="font-mono text-sky-400">0</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-slate-950 rounded-lg text-center text-slate-500 font-nastaliq">
-                    {t.noOverdue}
-                  </div>
-                </div>
-              </div>
-
-              {/* Payable (ادائیگی) */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <i data-lucide="arrow-up-circle" className="w-5 h-5 text-amber-400"></i>
-                    <h3 className="text-lg font-bold text-slate-100">{t.payable}</h3>
-                  </div>
-                  <span className="text-sm font-bold text-amber-400 font-nastaliq">{t.payableUrdu}</span>
-                </div>
-
-                <div className="mt-4 space-y-3 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.overdueBills}</span>
-                    <span className="font-mono font-bold text-slate-200">0</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.totalOverdue}</span>
-                    <span className="font-mono font-bold text-slate-200">0</span>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
-                    <span>{t.netPayable}</span>
-                    <span className="font-mono text-amber-400">0</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-slate-950 rounded-lg text-center text-slate-500 font-nastaliq">
-                    {t.noOverdue}
-                  </div>
-                </div>
-              </div>
-
-              {/* Stock Balance (اسٹاک) */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-colors">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <i data-lucide="boxes" className="w-5 h-5 text-emerald-400"></i>
-                    <h3 className="text-lg font-bold text-slate-100">{t.stockTitle}</h3>
-                  </div>
-                  <span className="text-sm font-bold text-emerald-400 font-nastaliq">{t.stockUrdu}</span>
-                </div>
-
-                <div className="mt-4 space-y-3 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.purchasesIn}</span>
-                    <span className="font-mono font-bold text-slate-200">0</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>{t.salesOut}</span>
-                    <span className="font-mono font-bold text-slate-200">-0</span>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-slate-200">
-                    <span>Stock Balance (موجودہ اسٹاک)</span>
-                    <span className="font-mono text-emerald-400">0 Bags</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center text-emerald-400 font-semibold">
-                    اسٹاک کھاتہ بالکل محفوظ ہے (Stock Balanced)
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Plant Machinery & Audit Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <i data-lucide="cpu" className="w-5 h-5 text-amber-400"></i>
-                    <h3 className="font-semibold text-slate-100 font-display">{t.plantTelemetry}</h3>
-                  </div>
-                  <span className="text-xs text-slate-400">فیکٹری پلانٹس (4 Stations)</span>
-                </div>
-
-                <div className="mt-4 divide-y divide-slate-800/60">
-                  {[
-                    { name: 'چنا دال پروسیسنگ پلانٹ A1 (Chana Daal Unit)', status: 'فعال (Operational)', note: '98% کارکردگی', color: 'emerald' },
-                    { name: 'مونگ دال پالشنگ یونٹ B (Moong Polisher)', status: 'ترمیم (Maintenance)', note: 'شیڈول کیلیبریشن', color: 'amber' },
-                    { name: 'مسور دال پیکنگ سیشن C (Packing Line)', status: 'فعال (Operational)', note: '100% کارکردگی', color: 'emerald' },
-                    { name: 'آٹومیٹک گریڈر اینڈ ڈسٹ کلینر 4', status: 'متبادل (Idle Queue)', note: 'بیچ انتظار', color: 'sky' },
-                  ].map((m, i) => (
-                    <div key={i} className="py-3.5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className={`w-2.5 h-2.5 rounded-full ${m.color === 'emerald' ? 'bg-emerald-400' : m.color === 'amber' ? 'bg-amber-400' : 'bg-sky-400'}`}></span>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-200 font-nastaliq">{m.name}</p>
-                          <p className="text-xs text-slate-400">{m.note}</p>
-                        </div>
-                      </div>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${m.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : m.color === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-sky-500/10 text-sky-400 border-sky-500/30'}`}>
-                        {m.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <i data-lucide="history" className="w-5 h-5 text-amber-400"></i>
-                    <h3 className="font-semibold text-slate-100 font-display">{t.auditLogs}</h3>
-                  </div>
-                  <i data-lucide="shield-check" className="w-4 h-4 text-emerald-400"></i>
-                </div>
-
-                <div className="mt-4 space-y-4">
-                  {[
-                    { action: 'خرید دال چنا (Raw Pulse Purchase)', detail: '500 بوریاں وصول کی گئیں (500 Bags)', time: '10 منٹ پہلے' },
-                    { action: 'فروخت مسور (Sales Gatepass)', detail: 'گیٹ پاس #2099 جاری ہوا', time: '25 منٹ پہلے' },
-                    { action: 'کارکنان حاضری (Workers Attendance)', detail: 'شفت B کی حاضری مکمل', time: '1 گھنٹہ پہلے' },
-                    { action: 'معائنہ معیار (Quality Inspection)', detail: 'بیچ #881 معیار پاس ہوا', time: '2 گھنٹے پہلے' },
-                  ].map((log, i) => (
-                    <div key={i} className="flex items-start gap-3 text-xs">
-                      <i data-lucide="check-circle-2" className="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-200 font-nastaliq">{log.action}</p>
-                        <p className="text-slate-400">{log.detail}</p>
-                      </div>
-                      <span className="text-slate-500 shrink-0">{log.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      };
-
+      // App Component
       const App = () => {
-        const [lang, setLang] = useState('ur'); // Default to Urdu & English bilingual mode
         const [activeTab, setActiveTab] = useState('dashboard');
-        const [user, setUser] = useState({ name: 'Abdullah Dilbar', role: 'Proprietor', email: 'admin@factoryflow.com' });
+        const [lang, setLang] = useState('ur'); // 'ur' or 'en'
+        const [searchQuery, setSearchQuery] = useState('');
+        const [selectedDate, setSelectedDate] = useState('2026-07-25');
+
+        // Dynamic State Storage
+        const [roznamchaList, setRoznamchaList] = useState(initialRoznamcha);
+        const [workersList, setWorkersList] = useState(initialWorkers);
+        const [purchasesList, setPurchasesList] = useState(initialPurchases);
+        const [salesList, setSalesList] = useState(initialSales);
+        const [partiesList, setPartiesList] = useState(initialParties);
+        const [productsList, setProductsList] = useState(initialProducts);
+        const [gatePassesList, setGatePassesList] = useState(initialGatePasses);
+
+        // Modal Form Controls
+        const [activeModal, setActiveModal] = useState(null); // 'roznamcha', 'worker', 'purchase', 'sale', 'party', 'product', 'gatepass'
+
+        // Form Draft States
+        const [formRoznamcha, setFormRoznamcha] = useState({ party: '', description: '', type: 'Cash Received', amount: '', voucher: '' });
+        const [formWorker, setFormWorker] = useState({ name: '', role: 'Operator', shift: 'Day Shift', dailyWage: '' });
+        const [formPurchase, setFormPurchase] = useState({ supplier: '', item: 'Raw Chana Pulse', bags: '', ratePerMaund: '' });
+        const [formSale, setFormSale] = useState({ customer: '', item: 'Processed Daal Chana (A-Grade)', bags: '', rate: '' });
+        const [formParty, setFormParty] = useState({ name: '', category: 'Customer', city: 'Faisalabad', phone: '', balance: '' });
+        const [formProduct, setFormProduct] = useState({ sku: '', name: '', bagWeight: '50 KG', stockBags: '', rate: '' });
+        const [formGatePass, setFormGatePass] = useState({ truckNo: '', driver: '', type: 'Outward Sale', goods: '', netWeight: '' });
 
         useEffect(() => {
           if (window.lucide) {
             window.lucide.createIcons();
           }
-        }, [activeTab, lang]);
+        }, [activeTab, lang, activeModal, roznamchaList, workersList, purchasesList, salesList]);
+
+        // Handlers to Add Data
+        const handleAddRoznamcha = (e) => {
+          e.preventDefault();
+          const newEntry = {
+            id: `ROZ-${Date.now().toString().slice(-4)}`,
+            date: selectedDate,
+            party: formRoznamcha.party || 'General Ledger Party',
+            description: formRoznamcha.description || 'Cash Transaction',
+            type: formRoznamcha.type,
+            amount: parseFloat(formRoznamcha.amount) || 0,
+            voucher: formRoznamcha.voucher || `V-${Math.floor(1000 + Math.random() * 9000)}`,
+          };
+          setRoznamchaList([newEntry, ...roznamchaList]);
+          setActiveModal(null);
+          setFormRoznamcha({ party: '', description: '', type: 'Cash Received', amount: '', voucher: '' });
+        };
+
+        const handleAddWorker = (e) => {
+          e.preventDefault();
+          const newWorker = {
+            id: `WRK-${Date.now().toString().slice(-3)}`,
+            name: formWorker.name,
+            role: formWorker.role,
+            shift: formWorker.shift,
+            dailyWage: parseFloat(formWorker.dailyWage) || 2000,
+            attendance: 'Present',
+            status: 'Paid',
+          };
+          setWorkersList([...workersList, newWorker]);
+          setActiveModal(null);
+          setFormWorker({ name: '', role: 'Operator', shift: 'Day Shift', dailyWage: '' });
+        };
+
+        const handleAddPurchase = (e) => {
+          e.preventDefault();
+          const bags = parseFloat(formPurchase.bags) || 0;
+          const rate = parseFloat(formPurchase.ratePerMaund) || 0;
+          const total = (bags * 1.25) * rate; // maunds conversion approx
+          const newPurchase = {
+            id: `PUR-${Date.now().toString().slice(-3)}`,
+            supplier: formPurchase.supplier || 'Raw Grain Supplier',
+            item: formPurchase.item,
+            bags: bags,
+            ratePerMaund: rate,
+            total: total,
+            date: selectedDate,
+            status: 'Received',
+          };
+          setPurchasesList([newPurchase, ...purchasesList]);
+          setActiveModal(null);
+          setFormPurchase({ supplier: '', item: 'Raw Chana Pulse', bags: '', ratePerMaund: '' });
+        };
+
+        const handleAddSale = (e) => {
+          e.preventDefault();
+          const bags = parseFloat(formSale.bags) || 0;
+          const rate = parseFloat(formSale.rate) || 0;
+          const total = bags * rate;
+          const newSale = {
+            id: `INV-${Date.now().toString().slice(-3)}`,
+            customer: formSale.customer || 'Wholesale Client',
+            item: formSale.item,
+            bags: bags,
+            rate: rate,
+            total: total,
+            date: selectedDate,
+            status: 'Delivered',
+          };
+          setSalesList([newSale, ...salesList]);
+          setActiveModal(null);
+          setFormSale({ customer: '', item: 'Processed Daal Chana (A-Grade)', bags: '', rate: '' });
+        };
+
+        const handleAddGatePass = (e) => {
+          e.preventDefault();
+          const newGP = {
+            id: `GP-${Date.now().toString().slice(-4)}`,
+            truckNo: formGatePass.truckNo || 'FSD-1090',
+            driver: formGatePass.driver || 'Driver Express',
+            type: formGatePass.type,
+            goods: formGatePass.goods || 'Daal Pulse Bags',
+            netWeight: formGatePass.netWeight || '10,000 KG',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'Cleared',
+          };
+          setGatePassesList([newGP, ...gatePassesList]);
+          setActiveModal(null);
+          setFormGatePass({ truckNo: '', driver: '', type: 'Outward Sale', goods: '', netWeight: '' });
+        };
+
+        // Calculations
+        const totalCashReceived = roznamchaList.filter(r => r.type === 'Cash Received').reduce((acc, r) => acc + r.amount, 0);
+        const totalCashPaid = roznamchaList.filter(r => r.type === 'Cash Paid').reduce((acc, r) => acc + r.amount, 0);
+        const openingRokar = 500000;
+        const currentRokar = openingRokar + totalCashReceived - totalCashPaid;
+        const totalStockBags = productsList.reduce((acc, p) => acc + p.stockBags, 0);
+
+        // Sidebar Navigation Configuration
+        const navItems = [
+          { id: 'dashboard', labelEn: 'Dashboard', labelUr: 'خلاصہ', icon: 'layout-dashboard' },
+          { id: 'daybook', labelEn: 'Day-Book', labelUr: 'روزنامچہ', icon: 'book-open' },
+          { id: 'workers', labelEn: 'Workers', labelUr: 'کارکنان', icon: 'users' },
+          { id: 'purchase', labelEn: 'Purchase', labelUr: 'خرید', icon: 'shopping-cart' },
+          { id: 'sale', labelEn: 'Sale', labelUr: 'فروخت', icon: 'trending-up' },
+          { id: 'parties', labelEn: 'Parties', labelUr: 'پارٹیز', icon: 'user-check' },
+          { id: 'products', labelEn: 'Products', labelUr: 'اشیاء', icon: 'package' },
+          { id: 'stock', labelEn: 'Stock', labelUr: 'مال / کھاتہ', icon: 'boxes' },
+          { id: 'gatepass', labelEn: 'Gate Pass', labelUr: 'گیٹ پاس', icon: 'ticket' },
+          { id: 'reports', labelEn: 'Reports', labelUr: 'رپورٹس', icon: 'bar-chart-3' },
+        ];
 
         return (
-          <div className="flex min-h-screen bg-slate-950 text-slate-100">
-            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} lang={lang} setLang={setLang} user={user} onLogout={() => alert('Logged out')} />
+          <div className="flex min-h-screen bg-dark-950 text-slate-100">
+            {/* Sidebar */}
+            <aside className="w-64 bg-dark-900 border-r border-dark-800 flex flex-col h-screen sticky top-0 z-30">
+              <div className="p-4 border-b border-dark-800 flex items-center gap-3 bg-dark-950/40">
+                <div className="p-2.5 bg-brand-500 rounded-xl text-black font-bold shadow-lg shadow-brand-500/20">
+                  <i data-lucide="factory" className="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h1 className="font-display font-bold text-sm text-brand-500 tracking-tight leading-tight">Muhammad Daal Factory</h1>
+                  <p className="text-[11px] text-slate-400 font-medium">Chak 230 RB Chohla, Faisalabad</p>
+                </div>
+              </div>
+
+              {/* Sidebar Menu Links */}
+              <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
+                {navItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                        isActive
+                          ? 'bg-brand-500 text-black shadow-lg shadow-brand-500/25 font-bold'
+                          : 'text-slate-300 hover:text-white hover:bg-dark-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-black' : 'text-slate-400'}`}></i>
+                        <span>{item.labelEn}</span>
+                      </div>
+                      <span className={`font-nastaliq text-xs ${isActive ? 'text-black font-bold' : 'text-amber-400/90'}`}>{item.labelUr}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Sidebar Profile Card & Language Switcher */}
+              <div className="p-3 border-t border-dark-800 bg-dark-950/60 space-y-2">
+                <button
+                  onClick={() => setLang(lang === 'ur' ? 'en' : 'ur')}
+                  className="w-full py-1.5 px-3 bg-dark-800 hover:bg-dark-750 border border-dark-700 text-brand-500 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <i data-lucide="languages" className="w-3.5 h-3.5"></i>
+                  <span>{lang === 'ur' ? 'English View' : 'اردو ڈسپلے'}</span>
+                </button>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2.5 overflow-hidden">
+                    <div className="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center font-bold text-xs border border-brand-500/40">
+                      A
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-xs font-bold text-slate-100 truncate">Abdullah Dilbar</p>
+                      <p className="text-[10px] text-slate-400 truncate">Proprietor / Administrator</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Main Application Container */}
             <div className="flex-1 flex flex-col min-w-0">
-              <Header lang={lang} setLang={setLang} />
+              {/* Header Bar */}
+              <header className="h-16 bg-dark-900/90 backdrop-blur border-b border-dark-800 px-6 flex items-center justify-between sticky top-0 z-20">
+                <div>
+                  <h2 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
+                    <span>Muhammad Daal Factory</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-500 border border-brand-500/30 font-mono">Faisalabad, PK</span>
+                  </h2>
+                  <p className="text-xs text-slate-400">Chak 230 RB Chohla, Jhang Road Faisalabad</p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-dark-950 border border-dark-800 rounded-lg text-xs text-slate-300 font-mono">
+                    <i data-lucide="calendar" className="w-3.5 h-3.5 text-brand-500"></i>
+                    <span>{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+
+                  <a href="tel:03000676293" className="hidden md:flex items-center gap-2 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-500 rounded-lg text-xs font-bold">
+                    <i data-lucide="phone" className="w-3.5 h-3.5"></i>
+                    <span>0300-0676293</span>
+                  </a>
+
+                  <div className="flex items-center gap-2 px-3 py-1 bg-dark-800 rounded-lg border border-dark-700 text-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span className="font-bold text-slate-200">Administrator</span>
+                  </div>
+                </div>
+              </header>
+
+              {/* Main Content Area */}
               <main className="flex-1 p-6 overflow-y-auto">
-                <DashboardView lang={lang} />
+                {/* 1. DASHBOARD TAB */}
+                {activeTab === 'dashboard' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خلاصہ — Executive Overview</h1>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => setActiveModal('roznamcha')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                          <i data-lucide="plus" className="w-4 h-4"></i>
+                          <span>+ نئ اندراج (Add Entry)</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Current Cash Balance Roznamcha Header Card */}
+                    <div className="bg-gradient-to-r from-brand-900/40 via-dark-900 to-dark-900 border border-brand-500/40 rounded-2xl p-6 glow-card">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-4 bg-brand-500/20 text-brand-500 rounded-2xl border border-brand-500/30">
+                            <i data-lucide="wallet" className="w-8 h-8"></i>
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-bold text-brand-500 font-nastaliq">موجودہ روکڑ — Current Cash Balance</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Roznamcha Net Operational Ledger Balance</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-4xl font-bold font-display text-brand-500 tracking-tight">PKR {currentRokar.toLocaleString()}</span>
+                          <p className="text-xs text-slate-400 mt-1 font-nastaliq">صاف شدہ نقد رقم (Verified Cash Balance)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3 Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                        <div className="flex items-center justify-between pb-3 border-b border-dark-800">
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Receivable</span>
+                          <span className="text-base font-bold text-sky-400 font-nastaliq">وصولی</span>
+                        </div>
+                        <div className="mt-4 space-y-2 text-xs">
+                          <div className="flex justify-between text-slate-400"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
+                          <div className="flex justify-between text-slate-400"><span>Total Overdue</span><span className="font-bold text-white font-mono">PKR 0</span></div>
+                          <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
+                            <span>Net Receivable</span>
+                            <span className="font-mono text-sky-400">PKR 820,000</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                        <div className="flex items-center justify-between pb-3 border-b border-dark-800">
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payable</span>
+                          <span className="text-base font-bold text-amber-400 font-nastaliq">ادائیگی</span>
+                        </div>
+                        <div className="mt-4 space-y-2 text-xs">
+                          <div className="flex justify-between text-slate-400"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
+                          <div className="flex justify-between text-slate-400"><span>Total Overdue</span><span className="font-bold text-white font-mono">PKR 0</span></div>
+                          <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
+                            <span>Net Payable</span>
+                            <span className="font-mono text-amber-400">PKR 485,000</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                        <div className="flex items-center justify-between pb-3 border-b border-dark-800">
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stock Balance</span>
+                          <span className="text-base font-bold text-emerald-400 font-nastaliq">اسٹاک / مال</span>
+                        </div>
+                        <div className="mt-4 space-y-2 text-xs">
+                          <div className="flex justify-between text-slate-400"><span>Total Purchases In</span><span className="font-bold text-white font-mono">800 Bags</span></div>
+                          <div className="flex justify-between text-slate-400"><span>Total Sales Out</span><span className="font-bold text-white font-mono">400 Bags</span></div>
+                          <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
+                            <span>Warehouse Stock</span>
+                            <span className="font-mono text-emerald-400">{totalStockBags.toLocaleString()} Bags</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Live Machinery Status */}
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl p-6">
+                      <div className="flex items-center justify-between pb-4 border-b border-dark-800">
+                        <div className="flex items-center gap-2">
+                          <i data-lucide="cpu" className="w-5 h-5 text-brand-500"></i>
+                          <h3 className="font-bold text-slate-100 font-display">Chana & Moong Milling Lines Live Telemetry</h3>
+                        </div>
+                        <span className="text-xs text-slate-400 font-mono">4 Processing Plants Operational</span>
+                      </div>
+
+                      <div className="mt-4 divide-y divide-dark-800">
+                        {[
+                          { name: 'چنا دال ڈی ہسکر اینڈ سپلیٹنگ مل (Chana De-Husker)', status: 'Operational (فعال)', note: 'Processing 12.5 Tons/hr', color: 'emerald' },
+                          { name: 'مونگ دال واشنگ اینڈ پولشنگ یونٹ (Moong Polisher)', status: 'Maintenance (ترمیم)', note: 'Sieve Screen Cleaning', color: 'amber' },
+                          { name: 'آٹومیٹک گریڈر اینڈ ویٹ پیکنگ لائن 1', status: 'Operational (فعال)', note: '50 KG Bagging Line Active', color: 'emerald' },
+                        ].map((m, i) => (
+                          <div key={i} className="py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className={`w-2.5 h-2.5 rounded-full ${m.color === 'emerald' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+                              <div>
+                                <p className="text-xs font-bold text-slate-200 font-nastaliq">{m.name}</p>
+                                <p className="text-[11px] text-slate-400">{m.note}</p>
+                              </div>
+                            </div>
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${m.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                              {m.status}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. DAY-BOOK (روزنامچہ) TAB */}
+                {activeTab === 'daybook' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">روزنامچہ — Roznamcha Ledger</h1>
+                      <button onClick={() => setActiveModal('roznamcha')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نئی اندراج (Add Entry)</span>
+                      </button>
+                    </div>
+
+                    {/* 5 KPI Stat Cards like Screenshot */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">ابتدائی روکڑ</span>
+                        <p className="text-xs text-slate-500">Opening Rokar</p>
+                        <h4 className="text-lg font-bold font-display text-sky-400 mt-2">PKR {openingRokar.toLocaleString()}</h4>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">جمع کیش</span>
+                        <p className="text-xs text-slate-500">Cash Received</p>
+                        <h4 className="text-lg font-bold font-display text-emerald-400 mt-2">PKR {totalCashReceived.toLocaleString()}</h4>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">بنام کیش</span>
+                        <p className="text-xs text-slate-500">Cash Paid</p>
+                        <h4 className="text-lg font-bold font-display text-rose-400 mt-2">PKR {totalCashPaid.toLocaleString()}</h4>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">موجودہ روکڑ</span>
+                        <p className="text-xs text-slate-500">Current Rokar</p>
+                        <h4 className="text-lg font-bold font-display text-brand-500 mt-2">PKR {currentRokar.toLocaleString()}</h4>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 col-span-2 md:col-span-1">
+                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">سوڑی کھاتہ</span>
+                        <p className="text-xs text-slate-500">Sori Khata</p>
+                        <h4 className="text-lg font-bold font-display text-purple-400 mt-2">PKR 0</h4>
+                      </div>
+                    </div>
+
+                    {/* Controls Bar: Date Picker & Search Bar */}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-dark-900 p-3 rounded-xl border border-dark-800">
+                      <div className="flex items-center gap-2 bg-dark-950 px-3 py-2 rounded-lg border border-dark-800">
+                        <i data-lucide="calendar" className="w-4 h-4 text-brand-500"></i>
+                        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-transparent text-xs font-mono text-slate-200 outline-none" />
+                      </div>
+
+                      <div className="flex-1 relative w-full">
+                        <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input
+                          type="text"
+                          placeholder="تلاش کریں — پارٹی نام، تفصیل، واؤچر..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full bg-dark-950 border border-dark-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-brand-500 font-nastaliq"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Roznamcha Ledger Table */}
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden shadow-xl">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">Voucher / ID</th>
+                            <th className="p-4">Date</th>
+                            <th className="p-4">Party Name</th>
+                            <th className="p-4">Description</th>
+                            <th className="p-4">Transaction Type</th>
+                            <th className="p-4 text-right">Amount (PKR)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {roznamchaList
+                            .filter(r => r.party.toLowerCase().includes(searchQuery.toLowerCase()) || r.description.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map((r, i) => (
+                              <tr key={i} className="hover:bg-dark-850/60 transition-colors">
+                                <td className="p-4 font-mono font-bold text-brand-500">{r.voucher}</td>
+                                <td className="p-4 font-mono text-slate-400">{r.date}</td>
+                                <td className="p-4 font-bold text-slate-200 font-nastaliq">{r.party}</td>
+                                <td className="p-4 text-slate-300">{r.description}</td>
+                                <td className="p-4">
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${r.type === 'Cash Received' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>
+                                    {r.type}
+                                  </span>
+                                </td>
+                                <td className={`p-4 text-right font-bold font-display text-sm ${r.type === 'Cash Received' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                  {r.type === 'Cash Received' ? '+' : '-'} PKR {r.amount.toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. WORKERS (کارکنان) TAB */}
+                {activeTab === 'workers' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">کارکنان — Mill Workers & Payroll</h1>
+                      <button onClick={() => setActiveModal('worker')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="user-plus" className="w-4 h-4"></i>
+                        <span>+ نیا کارکن (Add Worker)</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">Worker ID</th>
+                            <th className="p-4">Worker Name</th>
+                            <th className="p-4">Role / Duty</th>
+                            <th className="p-4">Shift</th>
+                            <th className="p-4">Daily Wage</th>
+                            <th className="p-4">Today Attendance</th>
+                            <th className="p-4 text-right">Payment Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {workersList.map((w, i) => (
+                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
+                              <td className="p-4 font-mono text-brand-500 font-bold">{w.id}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{w.name}</td>
+                              <td className="p-4 text-slate-300">{w.role}</td>
+                              <td className="p-4 text-slate-400">{w.shift}</td>
+                              <td className="p-4 font-mono font-bold text-slate-100">PKR {w.dailyWage.toLocaleString()} / day</td>
+                              <td className="p-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${w.attendance === 'Present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>
+                                  {w.attendance}
+                                </span>
+                              </td>
+                              <td className="p-4 text-right">
+                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${w.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                                  {w.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. PURCHASE (خرید) TAB */}
+                {activeTab === 'purchase' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خرید — Raw Grain Purchases</h1>
+                      <button onClick={() => setActiveModal('purchase')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نیا اینوائس (New Purchase Order)</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">PO Number</th>
+                            <th className="p-4">Supplier Party</th>
+                            <th className="p-4">Item Name</th>
+                            <th className="p-4">Bags Quantity</th>
+                            <th className="p-4">Rate / Maund (40KG)</th>
+                            <th className="p-4">Total Amount (PKR)</th>
+                            <th className="p-4 text-right">Delivery Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {purchasesList.map((p, i) => (
+                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
+                              <td className="p-4 font-mono font-bold text-brand-500">{p.id}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{p.supplier}</td>
+                              <td className="p-4 text-slate-300 font-semibold">{p.item}</td>
+                              <td className="p-4 font-bold text-slate-100 font-mono">{p.bags} Bags</td>
+                              <td className="p-4 font-mono text-slate-300">PKR {p.ratePerMaund.toLocaleString()}</td>
+                              <td className="p-4 font-bold font-display text-emerald-400">PKR {p.total.toLocaleString()}</td>
+                              <td className="p-4 text-right">
+                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${p.status === 'Received' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                                  {p.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. SALE (فروخت) TAB */}
+                {activeTab === 'sale' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">فروخت — Finished Goods Sales</h1>
+                      <button onClick={() => setActiveModal('sale')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نیا سیل بل (Create Invoice)</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">Invoice No</th>
+                            <th className="p-4">Customer Party</th>
+                            <th className="p-4">Finished Product</th>
+                            <th className="p-4">Bags Count</th>
+                            <th className="p-4">Rate / Bag</th>
+                            <th className="p-4">Total Amount (PKR)</th>
+                            <th className="p-4 text-right">Dispatch Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {salesList.map((s, i) => (
+                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
+                              <td className="p-4 font-mono font-bold text-brand-500">{s.id}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{s.customer}</td>
+                              <td className="p-4 text-slate-300 font-semibold">{s.item}</td>
+                              <td className="p-4 font-bold text-slate-100 font-mono">{s.bags} Bags</td>
+                              <td className="p-4 font-mono text-slate-300">PKR {s.rate.toLocaleString()}</td>
+                              <td className="p-4 font-bold font-display text-sky-400">PKR {s.total.toLocaleString()}</td>
+                              <td className="p-4 text-right">
+                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${s.status === 'Delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-sky-500/10 text-sky-400 border-sky-500/30'}`}>
+                                  {s.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. PARTIES (پارٹیز) TAB */}
+                {activeTab === 'parties' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">پارٹیز — Suppliers & Customer Accounts</h1>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {partiesList.map((p, i) => (
+                        <div key={i} className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-xs text-brand-500 font-bold">{p.id}</span>
+                            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${p.type === 'Receivable' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                              {p.type}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-slate-100 text-base mt-2 font-nastaliq">{p.name}</h3>
+                          <p className="text-xs text-slate-400">{p.city} • {p.phone}</p>
+                          <div className="mt-4 pt-3 border-t border-dark-800 flex justify-between items-center text-xs">
+                            <span className="text-slate-400">Current Balance:</span>
+                            <span className="font-bold font-display text-sm text-slate-100">PKR {p.balance.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. PRODUCTS (اشیاء) TAB */}
+                {activeTab === 'products' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">اشیاء — Pulse & Grain Products</h1>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {productsList.map((prd, i) => (
+                        <div key={i} className="bg-dark-900 border border-dark-800 rounded-xl p-5 flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-mono font-bold text-brand-500">{prd.sku}</span>
+                            <h3 className="font-bold text-slate-100 text-base font-nastaliq">{prd.name}</h3>
+                            <p className="text-xs text-slate-400 mt-1">Bag Packing Size: {prd.bagWeight}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xl font-bold font-display text-emerald-400">{prd.stockBags} Bags</span>
+                            <p className="text-xs text-slate-400 mt-0.5">Rate: PKR {prd.rate.toLocaleString()} / bag</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. GATE PASS (گیٹ پاس) TAB */}
+                {activeTab === 'gatepass' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">گیٹ پاس — Gate Pass Security Control</h1>
+                      <button onClick={() => setActiveModal('gatepass')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نیا گیٹ پاس (Generate Gate Pass)</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">Pass ID</th>
+                            <th className="p-4">Vehicle Truck No</th>
+                            <th className="p-4">Driver Name</th>
+                            <th className="p-4">Pass Type</th>
+                            <th className="p-4">Goods & Quantity</th>
+                            <th className="p-4">Net Weight</th>
+                            <th className="p-4 text-right">Time & Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {gatePassesList.map((gp, i) => (
+                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
+                              <td className="p-4 font-mono font-bold text-brand-500">{gp.id}</td>
+                              <td className="p-4 font-mono font-bold text-slate-100">{gp.truckNo}</td>
+                              <td className="p-4 text-slate-200 font-bold font-nastaliq">{gp.driver}</td>
+                              <td className="p-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${gp.type === 'Outward Sale' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>
+                                  {gp.type}
+                                </span>
+                              </td>
+                              <td className="p-4 text-slate-300 font-semibold">{gp.goods}</td>
+                              <td className="p-4 font-mono font-bold text-slate-100">{gp.netWeight}</td>
+                              <td className="p-4 text-right">
+                                <span className="text-slate-400 block font-mono text-[11px]">{gp.time}</span>
+                                <span className="text-emerald-400 font-bold text-[11px]">{gp.status}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </main>
             </div>
+
+            {/* MODAL DIALOG FOR DATA ENTRY */}
+            {activeModal && (
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-dark-900 border border-dark-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
+                  <button onClick={() => setActiveModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" className="w-5 h-5"></i>
+                  </button>
+
+                  {/* Roznamcha Modal */}
+                  {activeModal === 'roznamcha' && (
+                    <form onSubmit={handleAddRoznamcha} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا روزنامچہ اندراج — Add Roznamcha Entry</h3>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Party Name (پارٹی کا نام)</label>
+                        <input type="text" required value={formRoznamcha.party} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, party: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="e.g. Haji Aslam Traders" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Description (تفصیل)</label>
+                        <input type="text" required value={formRoznamcha.description} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, description: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="e.g. Advance payment for 100 bags" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Type</label>
+                          <select value={formRoznamcha.type} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, type: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
+                            <option value="Cash Received">Cash Received (جمع کیش)</option>
+                            <option value="Cash Paid">Cash Paid (بنام کیش)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Amount (PKR)</label>
+                          <input type="number" required value={formRoznamcha.amount} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, amount: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="50000" />
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs shadow-lg shadow-brand-500/25">Save Roznamcha Entry</button>
+                    </form>
+                  )}
+
+                  {/* Worker Modal */}
+                  {activeModal === 'worker' && (
+                    <form onSubmit={handleAddWorker} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا کارکن — Add New Worker</h3>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Worker Name (کارکن کا نام)</label>
+                        <input type="text" required value={formWorker.name} onChange={(e) => setFormWorker({ ...formWorker, name: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="e.g. Tariq Mehmood" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Role</label>
+                          <input type="text" required value={formWorker.role} onChange={(e) => setFormWorker({ ...formWorker, role: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Mill Operator" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Daily Wage (PKR)</label>
+                          <input type="number" required value={formWorker.dailyWage} onChange={(e) => setFormWorker({ ...formWorker, dailyWage: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="2000" />
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Save Worker Profile</button>
+                    </form>
+                  )}
+
+                  {/* Purchase Modal */}
+                  {activeModal === 'purchase' && (
+                    <form onSubmit={handleAddPurchase} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا اینوائس خرید — New Grain Purchase Order</h3>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Supplier Party</label>
+                        <input type="text" required value={formPurchase.supplier} onChange={(e) => setFormPurchase({ ...formPurchase, supplier: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Sargodha Mills" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Bags Count</label>
+                          <input type="number" required value={formPurchase.bags} onChange={(e) => setFormPurchase({ ...formPurchase, bags: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="300" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Rate / Maund (40KG)</label>
+                          <input type="number" required value={formPurchase.ratePerMaund} onChange={(e) => setFormPurchase({ ...formPurchase, ratePerMaund: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="6800" />
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Save Purchase Order</button>
+                    </form>
+                  )}
+
+                  {/* Sale Modal */}
+                  {activeModal === 'sale' && (
+                    <form onSubmit={handleAddSale} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا اینوائس فروخت — Create Sales Invoice</h3>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Customer Party</label>
+                        <input type="text" required value={formSale.customer} onChange={(e) => setFormSale({ ...formSale, customer: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Faisalabad Traders" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Bags Count</label>
+                          <input type="number" required value={formSale.bags} onChange={(e) => setFormSale({ ...formSale, bags: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="150" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Rate / Bag (PKR)</label>
+                          <input type="number" required value={formSale.rate} onChange={(e) => setFormSale({ ...formSale, rate: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="8200" />
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Generate Sales Invoice</button>
+                    </form>
+                  )}
+
+                  {/* GatePass Modal */}
+                  {activeModal === 'gatepass' && (
+                    <form onSubmit={handleAddGatePass} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا گیٹ پاس — Generate Gate Pass</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Vehicle Truck No</label>
+                          <input type="text" required value={formGatePass.truckNo} onChange={(e) => setFormGatePass({ ...formGatePass, truckNo: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="FSD-7892" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">Driver Name</label>
+                          <input type="text" required value={formGatePass.driver} onChange={(e) => setFormGatePass({ ...formGatePass, driver: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Rashid Khan" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-400 mb-1">Goods Description & Quantity</label>
+                        <input type="text" required value={formGatePass.goods} onChange={(e) => setFormGatePass({ ...formGatePass, goods: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="250 Bags Daal Chana" />
+                      </div>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Issue Official Gate Pass</button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         );
       };
