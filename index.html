@@ -82,34 +82,13 @@
         { id: 'GP-4001', truckNo: 'FSD-7892', driver: 'Rashid Khan (راشد خان)', type: 'Outward Freight', goods: '250 Bags Daal Chana', netWeight: '12,500 KG', time: '04:30 PM', status: 'Passed' },
       ];
 
-      const tourSteps = [
-        {
-          title: 'خوش آمدید! (Welcome to Muhammad Daal Factory ERP)',
-          description: 'یہ پاکستان کی پہلی مکمل مل انتظام اور روزنامچہ سسٹم ہے۔ آئیے چند اہم خصوصیات سیکھیں۔',
-        },
-        {
-          title: 'موجودہ روکڑ اور خلاصہ (Live Cash Balance & Roznamcha)',
-          description: 'ڈیش بورڈ پر آپ کو فیکٹری کی صاف شدہ روکڑ (Cash Balance)، وصولی اور ادائیگی کی تازہ ترین صورتحال نظر آئے گی۔',
-        },
-        {
-          title: 'روزنامچہ اینٹری (Daily Day-Book Entry)',
-          description: 'روزنامچہ ٹیب میں آپ + نئی اندراج پر کلک کر کے منڈی کی وصولی اور بنام کیش کا اندراج کر سکتے ہیں۔',
-        },
-        {
-          title: 'گیٹ پاس اور ورکرز (Gate Pass & Worker Payroll)',
-          description: 'ٹرکوں کی آمد و رفت کے لیے گیٹ پاس جاری کریں اور دھلائی دلائی ورکرز کی دیہاڑی اور حاضری کا حساب رکھیں۔',
-        }
-      ];
-
       const App = () => {
         const [user, setUser] = useState({ name: 'Abdullah Dilbar', email: 'admin@factoryflow.com', role: 'Admin' });
         const [activeTab, setActiveTab] = useState('dashboard');
-        const [displayLang, setDisplayLang] = useState('ur');
+        const [displayLang, setDisplayLang] = useState('ur'); // 'ur' or 'en'
         const [showAdminMenu, setShowAdminMenu] = useState(false);
-        const [activeModal, setActiveModal] = useState(null); // 'changePassword', 'languageModal', 'roznamcha', 'gatepass'
+        const [activeModal, setActiveModal] = useState(null);
         const [toastMessage, setToastMessage] = useState(null);
-        const [isFirstLogin, setIsFirstLogin] = useState(false);
-        const [tourIndex, setTourIndex] = useState(0);
 
         // Forms
         const [formLogin, setFormLogin] = useState({ username: 'admin@factoryflow.com', password: 'password123', role: 'Admin' });
@@ -123,7 +102,7 @@
           if (window.lucide) {
             window.lucide.createIcons();
           }
-        }, [user, activeTab, displayLang, showAdminMenu, activeModal, toastMessage, isFirstLogin, tourIndex]);
+        }, [user, activeTab, displayLang, showAdminMenu, activeModal, toastMessage]);
 
         const triggerToast = (msg) => {
           setToastMessage(msg);
@@ -140,7 +119,7 @@
           e.preventDefault();
           const roleName = formLogin.role === 'Admin' ? 'Admin' : 'Receptionist (منشی)';
           setUser({
-            name: formLogin.role === 'Admin' ? 'Abdullah Dilbar (مالک)' : 'Munshi Shabbir (منشی)',
+            name: formLogin.role === 'Admin' ? 'Abdullah Dilbar' : 'Munshi Shabbir',
             email: formLogin.username || 'admin@factoryflow.com',
             role: roleName,
           });
@@ -174,7 +153,7 @@
           { id: 'products', labelEn: 'Products', labelUr: 'اشیاء', icon: 'package' },
           { id: 'stock', labelEn: 'Stock', labelUr: 'مال / کھاتہ', icon: 'boxes' },
           { id: 'gatepass', labelEn: 'Gate Pass', labelUr: 'گیٹ پاس', icon: 'ticket' },
-          { id: 'language', labelEn: 'Language Settings', labelUr: 'زبان تبدیل کریں', icon: 'languages' },
+          { id: 'languageTab', labelEn: 'Language Switcher', labelUr: 'زبان تبدیل کریں', icon: 'languages' },
           { id: 'reports', labelEn: 'Reports', labelUr: 'رپورٹس', icon: 'bar-chart-3' },
         ];
 
@@ -227,7 +206,7 @@
                         required
                         value={formLogin.username}
                         onChange={(e) => setFormLogin({ ...formLogin, username: e.target.value })}
-                        className="w-full bg-dark-950 border border-dark-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-brand-500"
+                        className="w-full bg-dark-950 border border-dark-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 outline-none focus:border-brand-500"
                       />
                     </div>
                   </div>
@@ -256,7 +235,7 @@
           );
         }
 
-        // 2. MAIN SYSTEM DASHBOARD
+        // 2. MAIN DASHBOARD UI
         return (
           <div className="flex min-h-screen bg-dark-950 text-slate-100 font-sans relative">
             {toastMessage && (
@@ -265,46 +244,6 @@
                   <i data-lucide="info" className="w-4 h-4"></i>
                 </div>
                 <span className="text-xs font-bold font-nastaliq">{toastMessage}</span>
-              </div>
-            )}
-
-            {/* FIRST TIME USER ONBOARDING TOUR */}
-            {isFirstLogin && (
-              <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                <div className="bg-dark-900 border-2 border-brand-500/60 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 glow-active">
-                  <div className="flex items-center justify-between pb-3 border-b border-dark-800">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-brand-500 text-black rounded-xl font-bold">
-                        <i data-lucide="sparkles" className="w-5 h-5"></i>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-500 font-mono">Step {tourIndex + 1} of {tourSteps.length}</span>
-                        <h3 className="text-lg font-bold text-slate-100 font-nastaliq">{tourSteps[tourIndex].title}</h3>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-300 font-nastaliq leading-relaxed">{tourSteps[tourIndex].description}</p>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-dark-800">
-                    <button onClick={() => setIsFirstLogin(false)} className="text-xs text-slate-400 hover:text-slate-200">
-                      Skip Tour (گائیڈ بند کریں)
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {tourIndex < tourSteps.length - 1 ? (
-                        <button onClick={() => setTourIndex(tourIndex + 1)} className="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs flex items-center gap-2">
-                          <span>اگلا قدم (Next Step)</span>
-                          <i data-lucide="chevron-right" className="w-4 h-4"></i>
-                        </button>
-                      ) : (
-                        <button onClick={() => setIsFirstLogin(false)} className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-xs">
-                          شروع کریں (Start Using ERP)
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
@@ -322,49 +261,77 @@
                 </div>
               </div>
 
+              {/* Sidebar Navigation Items */}
               <nav className="flex-1 overflow-y-auto p-3 space-y-1">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
+                  const isLangTab = item.id === 'languageTab';
                   return (
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (item.id === 'language') {
+                        if (isLangTab) {
                           setActiveModal('languageModal');
                         } else {
                           setActiveTab(item.id);
                         }
                       }}
                       className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                        isActive || (item.id === 'language' && activeModal === 'languageModal')
+                        isActive || (isLangTab && activeModal === 'languageModal')
                           ? 'bg-brand-500 text-black shadow-lg shadow-brand-500/25 font-bold'
+                          : isLangTab
+                          ? 'bg-brand-500/10 border border-brand-500/30 text-amber-400 hover:bg-brand-500/20'
                           : 'text-slate-300 hover:text-white hover:bg-dark-800/80'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-black' : 'text-slate-400'}`}></i>
+                        <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? 'text-black' : isLangTab ? 'text-brand-500' : 'text-slate-400'}`}></i>
                         <span>{displayLang === 'ur' ? item.labelUr : item.labelEn}</span>
                       </div>
-                      <span className="font-nastaliq text-[11px] text-amber-400">{item.labelUr}</span>
+                      <span className="font-nastaliq text-[11px] font-bold text-amber-400">{item.labelUr}</span>
                     </button>
                   );
                 })}
               </nav>
 
-              <div className="p-4 border-t border-dark-800 bg-dark-950/60 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center font-bold text-xs border border-brand-500/40">
-                    A
+              {/* Sidebar Bottom Profile Card matching Screenshot */}
+              <div className="p-4 border-t border-dark-800 bg-dark-950/60 space-y-3">
+                {/* Dedicated Language Switcher Button right above profile */}
+                <button
+                  onClick={() => setActiveModal('languageModal')}
+                  className="w-full py-2 px-3 bg-brand-500/15 hover:bg-brand-500/25 border border-brand-500/30 text-brand-500 rounded-xl text-xs font-bold flex items-center justify-between transition-colors font-nastaliq"
+                >
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="languages" className="w-4 h-4"></i>
+                    <span>{displayLang === 'ur' ? 'زبان تبدیل کریں (Language)' : 'Switch Language'}</span>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-100">{user?.name}</p>
-                    <p className="text-[10px] text-brand-500 font-bold">{user?.role}</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 font-bold">
+                    {displayLang === 'ur' ? 'اردو' : 'EN'}
+                  </span>
+                </button>
+
+                {/* Profile Information Box matching Screenshot */}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-950/80 text-amber-500 flex items-center justify-center font-bold text-sm border border-amber-500/40">
+                      A
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-100">{user?.name}</p>
+                      <p className="text-[11px] font-bold text-brand-500">{user?.role}</p>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setShowAdminMenu(!showAdminMenu)}
+                    className="p-1 text-slate-400 hover:text-white"
+                  >
+                    <i data-lucide="chevron-up" className="w-4 h-4"></i>
+                  </button>
                 </div>
               </div>
             </aside>
 
-            {/* Main Application Container */}
+            {/* Main Workspace */}
             <div className="flex-1 flex flex-col min-w-0">
               {/* Header Bar */}
               <header className="h-16 bg-dark-900/90 backdrop-blur border-b border-dark-800 px-6 flex items-center justify-between sticky top-0 z-20">
@@ -375,7 +342,7 @@
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
-                    <span>25-Jul-2026 • 18:53</span>
+                    <span>25-Jul-2026 • 18:55</span>
                   </div>
 
                   <a href="tel:03000676293" className="flex items-center gap-2 px-3 py-1 bg-dark-950 border border-dark-800 text-brand-500 rounded-lg text-xs font-bold">
@@ -383,7 +350,7 @@
                     <span>0300-0676293</span>
                   </a>
 
-                  {/* Profile Dropdown Menu matching Screenshot */}
+                  {/* Profile Dropdown */}
                   <div className="relative">
                     <button
                       onClick={() => setShowAdminMenu(!showAdminMenu)}
@@ -403,7 +370,6 @@
                         </div>
 
                         <div className="space-y-1">
-                          {/* 1. Language Option */}
                           <button
                             onClick={() => { setShowAdminMenu(false); setActiveModal('languageModal'); }}
                             className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold text-amber-400 hover:bg-dark-800 flex items-center justify-between transition-colors font-nastaliq"
@@ -412,7 +378,6 @@
                             <i data-lucide="languages" className="w-4 h-4 text-brand-500"></i>
                           </button>
 
-                          {/* 2. Change Password Option */}
                           <button
                             onClick={() => { setShowAdminMenu(false); setActiveModal('changePassword'); }}
                             className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold text-slate-200 hover:bg-dark-800 flex items-center justify-between transition-colors font-nastaliq"
@@ -421,16 +386,6 @@
                             <i data-lucide="key" className="w-4 h-4 text-brand-500"></i>
                           </button>
 
-                          {/* 3. Show Onboarding Tour */}
-                          <button
-                            onClick={() => { setShowAdminMenu(false); setIsFirstLogin(true); setTourIndex(0); }}
-                            className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold text-slate-200 hover:bg-dark-800 flex items-center justify-between transition-colors font-nastaliq"
-                          >
-                            <span>گائیڈ دیکھیں (Show Onboarding Tour)</span>
-                            <i data-lucide="help-circle" className="w-4 h-4 text-brand-500"></i>
-                          </button>
-
-                          {/* 4. Log Out Option */}
                           <button
                             onClick={handleLogout}
                             className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center justify-between transition-colors font-nastaliq"
@@ -445,7 +400,7 @@
                 </div>
               </header>
 
-              {/* Main Workspace */}
+              {/* Main Content Workspace */}
               <main className="flex-1 p-6 overflow-y-auto">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -533,7 +488,7 @@
                     </div>
                   )}
 
-                  {/* Change Password Modal (Matching Screenshot 1) */}
+                  {/* Change Password Modal */}
                   {activeModal === 'changePassword' && (
                     <form onSubmit={handleChangePassword} className="space-y-4">
                       <div className="flex items-center gap-3 pb-3 border-b border-dark-800">
