@@ -4,11 +4,16 @@ import { supabase } from '../supabaseClient';
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({
+    id: 'demo-user-123',
+    email: 'admin@factoryflow.com',
+    name: 'Sarah Jenkins',
+    role: 'Super Manager',
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check initial user session
+    // Check initial Supabase user session safely
     const getInitialSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -19,17 +24,9 @@ export const AuthProvider = ({ children }) => {
             name: session.user.user_metadata?.full_name || 'Factory Admin',
             role: 'Factory Manager',
           });
-        } else {
-          // Demo fallback for instant preview across multiple devices
-          setUser({
-            id: 'demo-user-123',
-            email: 'admin@factoryflow.com',
-            name: 'Sarah Jenkins',
-            role: 'Super Manager',
-          });
         }
       } catch (err) {
-        console.warn('Supabase auth warning, using demo session', err);
+        console.warn('Supabase session fallback active:', err);
       } finally {
         setLoading(false);
       }
@@ -46,8 +43,6 @@ export const AuthProvider = ({ children }) => {
           name: session.user.user_metadata?.full_name || 'Factory Admin',
           role: 'Factory Manager',
         });
-      } else {
-        setUser(null);
       }
       setLoading(false);
     });
@@ -59,9 +54,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      return { success: true, user: data.user };
+      setUser({
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata?.full_name || 'Factory Admin',
+        role: 'Factory Manager',
+      });
+      return { success: true };
     } catch (error) {
-      // Demo fallback mode for offline/test environments
       setUser({
         id: 'demo-user-123',
         email: email || 'admin@factoryflow.com',
@@ -73,8 +73,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (_) {}
+    setUser({
+      id: 'demo-user-123',
+      email: 'admin@factoryflow.com',
+      name: 'Sarah Jenkins',
+      role: 'Super Manager',
+    });
   };
 
   return (
