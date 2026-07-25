@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Muhammad Daal Factory - Enterprise Pulse Mill System (محمد دال فیکٹری)</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Muhammad Daal Factory - Enterprise Management System v2.5 (محمد دال فیکٹری)</title>
     
     <!-- Modern Typography: Inter + Space Grotesk + Noto Nastaliq Urdu -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,25 +81,18 @@
         { id: '1', name: 'محمد رمضان (Muhammad Ramzan)', category: 'دھلائی', phone: '0300-1234567', city: 'فیصل آباد', dailyWage: 2500, attendance: 'Present' },
       ];
 
-      const initialGatePasses = [
-        { id: 'GP-4001', truckNo: 'FSD-7892', driver: 'Rashid Khan (راشد خان)', type: 'Outward Freight', goods: '250 Bags Daal Chana', netWeight: '12,500 KG', time: '04:30 PM', status: 'Passed' },
-      ];
-
       const App = () => {
         const [user, setUser] = useState({ name: 'Abdullah Dilbar', email: 'admin@factoryflow.com', role: 'Admin' });
         const [activeTab, setActiveTab] = useState('dashboard');
-        const [displayLang, setDisplayLang] = useState('ur'); // 'ur' or 'en'
+        const [displayLang, setDisplayLang] = useState('ur');
         const [showAdminMenu, setShowAdminMenu] = useState(false);
-        const [activeModal, setActiveModal] = useState(null);
+        const [activeModal, setActiveModal] = useState(null); // 'changePassword', 'languageModal', 'roznamcha'
         const [toastMessage, setToastMessage] = useState(null);
 
         // Forms
         const [formLogin, setFormLogin] = useState({ username: 'admin@factoryflow.com', password: 'password123', role: 'Admin' });
         const [formPassword, setFormPassword] = useState({ current: '', newPass: '', confirm: '' });
-
         const [roznamchaList, setRoznamchaList] = useState(initialRoznamcha);
-        const [workersList, setWorkersList] = useState(initialWorkers);
-        const [gatePassesList, setGatePassesList] = useState(initialGatePasses);
 
         useEffect(() => {
           if (window.lucide) {
@@ -157,19 +153,9 @@
           { id: 'reports', labelEn: 'Reports', labelUr: 'رپورٹس', icon: 'bar-chart-3' },
         ];
 
-        // 1. SIGN IN SCREEN
         if (!user) {
           return (
             <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-4 relative font-sans">
-              {toastMessage && (
-                <div className="fixed top-6 right-6 z-50 bg-dark-850 border border-sky-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
-                  <div className="p-1 bg-sky-500/20 text-sky-400 rounded-lg">
-                    <i data-lucide="info" className="w-4 h-4"></i>
-                  </div>
-                  <span className="text-xs font-bold font-nastaliq">{toastMessage}</span>
-                </div>
-              )}
-
               <div className="w-full max-w-md bg-dark-900 border border-dark-800 rounded-2xl p-8 shadow-2xl space-y-6">
                 <div className="flex flex-col items-center text-center space-y-2">
                   <div className="p-3 bg-brand-500/20 text-brand-500 rounded-2xl border border-brand-500/40 shadow-lg shadow-brand-500/20">
@@ -235,7 +221,6 @@
           );
         }
 
-        // 2. MAIN DASHBOARD UI
         return (
           <div className="flex min-h-screen bg-dark-950 text-slate-100 font-sans relative">
             {toastMessage && (
@@ -261,7 +246,7 @@
                 </div>
               </div>
 
-              {/* Sidebar Navigation Items */}
+              {/* Sidebar Links */}
               <nav className="flex-1 overflow-y-auto p-3 space-y-1">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
@@ -294,9 +279,8 @@
                 })}
               </nav>
 
-              {/* Sidebar Bottom Profile Card matching Screenshot */}
+              {/* Sidebar Bottom Profile Card */}
               <div className="p-4 border-t border-dark-800 bg-dark-950/60 space-y-3">
-                {/* Dedicated Language Switcher Button right above profile */}
                 <button
                   onClick={() => setActiveModal('languageModal')}
                   className="w-full py-2 px-3 bg-brand-500/15 hover:bg-brand-500/25 border border-brand-500/30 text-brand-500 rounded-xl text-xs font-bold flex items-center justify-between transition-colors font-nastaliq"
@@ -310,7 +294,6 @@
                   </span>
                 </button>
 
-                {/* Profile Information Box matching Screenshot */}
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-amber-950/80 text-amber-500 flex items-center justify-center font-bold text-sm border border-amber-500/40">
@@ -342,7 +325,7 @@
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
-                    <span>25-Jul-2026 • 18:55</span>
+                    <span>25-Jul-2026 • 18:58</span>
                   </div>
 
                   <a href="tel:03000676293" className="flex items-center gap-2 px-3 py-1 bg-dark-950 border border-dark-800 text-brand-500 rounded-lg text-xs font-bold">
@@ -350,7 +333,7 @@
                     <span>0300-0676293</span>
                   </a>
 
-                  {/* Profile Dropdown */}
+                  {/* Top Profile Dropdown */}
                   <div className="relative">
                     <button
                       onClick={() => setShowAdminMenu(!showAdminMenu)}
@@ -400,7 +383,7 @@
                 </div>
               </header>
 
-              {/* Main Content Workspace */}
+              {/* Main Workspace */}
               <main className="flex-1 p-6 overflow-y-auto">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -463,7 +446,7 @@
                             <span className="text-2xl">🇵🇰</span>
                             <div className="text-left">
                               <p className="text-base font-bold font-nastaliq">اردو (Urdu Nastaliq)</p>
-                              <p className="text-xs text-slate-400">فیکٹری ڈسپلے کی زبان اردو میں منتقل کریں</p>
+                              <p className="text-xs text-slate-400 font-nastaliq">فیکٹری ڈسپلے کی زبان اردو میں منتقل کریں</p>
                             </div>
                           </div>
                           {displayLang === 'ur' && <i data-lucide="check-circle-2" className="w-5 h-5 text-brand-500"></i>}
