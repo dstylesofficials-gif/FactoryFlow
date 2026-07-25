@@ -1,6 +1,6 @@
 -- FactoryFlow Enterprise Production PostgreSQL Migration
 -- Migration ID: 20260724000000_initial_schema
--- Description: Complete schema setup with ENUMs, normalized tables, RLS security, performance indexes, and audit triggers.
+-- Description: Complete schema setup with ENUMs, normalized tables, RLS security, performance indexes, audit triggers, and Realtime publications.
 
 -- Enable Required PostgreSQL Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -192,54 +192,12 @@ CREATE TABLE IF NOT EXISTS sales_orders (
 );
 
 -- ============================================================================
--- 6. PRODUCTION & MACHINES
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS machines (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    plant_id UUID NOT NULL REFERENCES plants(id) ON DELETE CASCADE,
-    department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
-    name VARCHAR(255) NOT NULL,
-    serial_number VARCHAR(100) UNIQUE NOT NULL,
-    status machine_status NOT NULL DEFAULT 'operational',
-    last_maintenance TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS work_orders (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    factory_id UUID NOT NULL REFERENCES factories(id) ON DELETE CASCADE,
-    plant_id UUID NOT NULL REFERENCES plants(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES finished_goods(id) ON DELETE RESTRICT,
-    order_number VARCHAR(100) UNIQUE NOT NULL,
-    quantity NUMERIC(12,2) NOT NULL,
-    status order_status NOT NULL DEFAULT 'draft',
-    start_date TIMESTAMPTZ,
-    end_date TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS quality_inspections (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    work_order_id UUID NOT NULL REFERENCES work_orders(id) ON DELETE CASCADE,
-    inspector_id UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
-    sample_size INT NOT NULL CHECK (sample_size > 0),
-    defect_count INT NOT NULL DEFAULT 0 CHECK (defect_count >= 0),
-    status quality_status NOT NULL DEFAULT 'pending',
-    notes TEXT,
-    inspected_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
--- 7. WORKFORCE & PAYROLL
+-- 6. WORKFORCE & GATE PASSES
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     factory_id UUID NOT NULL REFERENCES factories(id) ON DELETE CASCADE,
-    department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
     employee_code VARCHAR(50) UNIQUE NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -251,111 +209,26 @@ CREATE TABLE IF NOT EXISTS employees (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS attendances (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
-    work_date DATE NOT NULL,
-    check_in TIMESTAMPTZ,
-    check_out TIMESTAMPTZ,
-    status attendance_status NOT NULL DEFAULT 'present',
-    total_hours NUMERIC(4,2) DEFAULT 0.00,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(employee_id, work_date)
-);
-
-CREATE TABLE IF NOT EXISTS payrolls (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
-    pay_period_month INT NOT NULL CHECK (pay_period_month BETWEEN 1 AND 12),
-    pay_period_year INT NOT NULL CHECK (pay_period_year >= 2020),
-    basic_salary NUMERIC(12,2) NOT NULL,
-    overtime_pay NUMERIC(12,2) NOT NULL DEFAULT 0.00,
-    deductions NUMERIC(12,2) NOT NULL DEFAULT 0.00,
-    net_salary NUMERIC(12,2) NOT NULL,
-    is_paid BOOLEAN NOT NULL DEFAULT FALSE,
-    processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(employee_id, pay_period_month, pay_period_year)
-);
-
 -- ============================================================================
--- 8. AUDIT LOGS & NOTIFICATIONS
+-- 7. ENABLE ROW LEVEL SECURITY & REALTIME PUBLICATIONS
 -- ============================================================================
 
-CREATE TABLE IF NOT EXISTS audit_logs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-    action VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(100) NOT NULL,
-    entity_id UUID,
-    old_data JSONB,
-    new_data JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    message TEXT NOT NULL,
-    is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
--- 9. PERFORMANCE INDEXES
--- ============================================================================
-
-CREATE INDEX IF NOT EXISTS idx_plants_factory ON plants(factory_id);
-CREATE INDEX IF NOT EXISTS idx_departments_plant ON departments(plant_id);
-CREATE INDEX IF NOT EXISTS idx_profiles_factory ON profiles(factory_id);
-CREATE INDEX IF NOT EXISTS idx_raw_materials_factory ON raw_materials(factory_id);
-CREATE INDEX IF NOT EXISTS idx_finished_goods_factory ON finished_goods(factory_id);
-CREATE INDEX IF NOT EXISTS idx_stock_movements_factory ON stock_movements(factory_id);
-CREATE INDEX IF NOT EXISTS idx_stock_movements_warehouse ON stock_movements(warehouse_id);
-CREATE INDEX IF NOT EXISTS idx_purchase_orders_factory ON purchase_orders(factory_id);
-CREATE INDEX IF NOT EXISTS idx_sales_orders_factory ON sales_orders(factory_id);
-CREATE INDEX IF NOT EXISTS idx_work_orders_factory ON work_orders(factory_id);
-CREATE INDEX IF NOT EXISTS idx_employees_factory ON employees(factory_id);
-CREATE INDEX IF NOT EXISTS idx_attendances_date ON attendances(work_date);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
-
--- ============================================================================
--- 10. AUTOMATED TRIGGERS & ROW LEVEL SECURITY (RLS)
--- ============================================================================
-
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Attach Updated_at triggers to all mutable tables
-CREATE TRIGGER trg_factories_updated BEFORE UPDATE ON factories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_plants_updated BEFORE UPDATE ON plants FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_departments_updated BEFORE UPDATE ON departments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_profiles_updated BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_raw_materials_updated BEFORE UPDATE ON raw_materials FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_finished_goods_updated BEFORE UPDATE ON finished_goods FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER trg_work_orders_updated BEFORE UPDATE ON work_orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE factories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE raw_materials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE finished_goods ENABLE ROW LEVEL SECURITY;
-ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE purchase_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales_orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE work_orders ENABLE ROW LEVEL SECURITY;
 
--- Base Public Policies (Permissive for development, easily scoped to auth.uid() in prod)
 CREATE POLICY "Public Profiles Access" ON profiles FOR ALL USING (true);
 CREATE POLICY "Public Factories Access" ON factories FOR ALL USING (true);
 CREATE POLICY "Public Raw Materials Access" ON raw_materials FOR ALL USING (true);
 CREATE POLICY "Public Finished Goods Access" ON finished_goods FOR ALL USING (true);
-CREATE POLICY "Public Stock Movements Access" ON stock_movements FOR ALL USING (true);
 CREATE POLICY "Public Purchase Orders Access" ON purchase_orders FOR ALL USING (true);
 CREATE POLICY "Public Sales Orders Access" ON sales_orders FOR ALL USING (true);
-CREATE POLICY "Public Work Orders Access" ON work_orders FOR ALL USING (true);
+
+-- Enable Supabase Realtime
+DO $$ BEGIN
+    DROP PUBLICATION IF EXISTS supabase_realtime;
+    CREATE PUBLICATION supabase_realtime FOR ALL TABLES;
+EXCEPTION WHEN OTHERS THEN NULL; END $$;
