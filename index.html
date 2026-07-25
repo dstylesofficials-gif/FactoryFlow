@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Muhammad Daal Factory - Enterprise Factory Management System</title>
+    <title>Muhammad Daal Factory - Enterprise Management System</title>
     
     <!-- Modern Typography: Inter + Space Grotesk + Noto Nastaliq Urdu -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,14 +25,13 @@
                 600: '#d97706',
                 700: '#b45309',
                 800: '#92400e',
-                900: '#78350f',
               },
               dark: {
-                950: '#0b0f19',
-                900: '#121726',
-                850: '#182033',
-                800: '#1f2942',
-                750: '#283554',
+                950: '#0c1017',
+                900: '#121620',
+                850: '#181e2b',
+                800: '#1e2536',
+                750: '#263045',
               }
             },
             fontFamily: {
@@ -55,11 +54,10 @@
 
     <style>
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #0b0f19; }
-      ::-webkit-scrollbar-thumb { background: #1f2942; border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: #0c1017; }
+      ::-webkit-scrollbar-thumb { background: #1e2536; border-radius: 4px; }
       ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
-      .font-nastaliq { font-family: 'Noto Nastaliq Urdu', serif; line-height: 1.9; }
-      .glow-amber { box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.3); }
+      .font-nastaliq { font-family: 'Noto Nastaliq Urdu', serif; line-height: 1.8; }
       .glow-card { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5); }
     </style>
   </head>
@@ -69,170 +67,180 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      // Initial Seed Data for Complete Interactive Functionality
+      // Seed Data matching screenshots
       const initialRoznamcha = [
-        { id: 'ROZ-101', date: '2026-07-25', party: 'Haji Aslam Grain Supplier', description: 'Chana Pulse 200 Bags Advance Payment', type: 'Cash Paid', amount: 150000, voucher: 'V-8801' },
+        { id: 'ROZ-101', date: '2026-07-25', party: 'Haji Aslam Grain Supplier', description: 'Chana Pulse Advance Payment', type: 'Cash Paid', amount: 150000, voucher: 'V-8801' },
         { id: 'ROZ-102', date: '2026-07-25', party: 'Faisalabad Traders', description: 'Daal Moong Sale Receipt', type: 'Cash Received', amount: 280000, voucher: 'V-8802' },
-        { id: 'ROZ-103', date: '2026-07-24', party: 'Chaudhry Transport', description: 'Truck Gatepass Freight Charges', type: 'Cash Paid', amount: 25000, voucher: 'V-8803' },
       ];
 
       const initialWorkers = [
-        { id: 'WRK-01', name: 'Muhammad Ramzan', role: 'Chief Mill Operator', shift: 'Day Shift', dailyWage: 2500, attendance: 'Present', status: 'Paid' },
-        { id: 'WRK-02', name: 'Tariq Mehmood', role: 'Packaging Incharge', shift: 'Day Shift', dailyWage: 2000, attendance: 'Present', status: 'Pending' },
-        { id: 'WRK-03', name: 'Shahid Iqbal', role: 'Gate Inspector', shift: 'Night Shift', dailyWage: 1800, attendance: 'Present', status: 'Paid' },
-        { id: 'WRK-04', name: 'Allah Ditta', role: 'Loading Loader', shift: 'Day Shift', dailyWage: 1600, attendance: 'Absent', status: 'Unpaid' },
+        { id: '1', name: 'Muhammad Ramzan (محمد رمضان)', category: 'دھلائی', phone: '0300-1234567', city: 'فیصل آباد', dailyWage: 2500, attendance: 'Present' },
+        { id: '2', name: 'Tariq Mehmood (طارق محمود)', category: 'دلائی', phone: '0313-7654321', city: 'فیصل آباد', dailyWage: 2200, attendance: 'Present' },
+        { id: '3', name: 'Allah Ditta (اللہ دتہ)', category: 'رکشہ والا', phone: '0321-9988776', city: 'فیصل آباد', dailyWage: 1800, attendance: 'Present' },
       ];
 
       const initialPurchases = [
-        { id: 'PUR-501', supplier: 'Haji Aslam Grain Co', item: 'Raw Chana Pulse', bags: 500, ratePerMaund: 6800, total: 3400000, date: '2026-07-25', status: 'Received' },
-        { id: 'PUR-502', supplier: 'Sargodha Agricultural Mills', item: 'Raw Moong Pulse', bags: 300, ratePerMaund: 7400, total: 2220000, date: '2026-07-24', status: 'In Transit' },
+        { id: '1', party: 'Haji Aslam Grain Co', product: 'ماش سالم ایس کیو - خام', quantityKg: 25000, totalAmount: 3400000, date: '2026-07-25' },
       ];
 
       const initialSales = [
-        { id: 'INV-901', customer: 'Faisalabad Wholesale Traders', item: 'Processed Daal Chana (A-Grade)', bags: 250, rate: 8200, total: 2050000, date: '2026-07-25', status: 'Delivered' },
-        { id: 'INV-902', customer: 'Lahore Grocery Supermarket', item: 'Polished Daal Moong', bags: 150, rate: 9100, total: 1365000, date: '2026-07-24', status: 'Dispatched' },
+        { id: '1', invoice: 'INV-901', party: 'Faisalabad Wholesale Traders', product: 'دال ماش ایس کیو', bags: 250, totalAmount: 2050000, date: '2026-07-25' },
       ];
 
       const initialParties = [
-        { id: 'PRT-01', name: 'Haji Aslam Grain Supplier', category: 'Supplier', city: 'Sargodha', phone: '0300-6543210', balance: 450000, type: 'Payable' },
-        { id: 'PRT-02', name: 'Faisalabad Traders', category: 'Customer', city: 'Faisalabad', phone: '0313-9876543', balance: 820000, type: 'Receivable' },
-        { id: 'PRT-03', name: 'Chaudhry Transport Co', category: 'Transporter', city: 'Faisalabad', phone: '0321-4455667', balance: 35000, type: 'Payable' },
+        { id: '1', name: 'Haji Aslam Grain Supplier', phone: '0300-6543210', city: 'Sargodha', type: 'Party', balance: 450000 },
+      ];
+
+      const initialBrokers = [
+        { id: '1', name: 'سوڑی کھاتہ (Sori Khata)', code: 'مستقل کھاتہ', rate: 'Current Rate: 0', type: 'Broker' },
       ];
 
       const initialProducts = [
-        { sku: 'PROD-CHANA-A', name: 'Daal Chana Special (دال چنا)', bagWeight: '50 KG', stockBags: 1250, rate: 8200, category: 'Finished Goods' },
-        { sku: 'PROD-MOONG-P', name: 'Daal Moong Polished (دال مونگ)', bagWeight: '50 KG', stockBags: 840, rate: 9100, category: 'Finished Goods' },
-        { sku: 'PROD-MASOOR-W', name: 'Daal Masoor Whole (دال مسور)', bagWeight: '50 KG', stockBags: 620, rate: 7800, category: 'Finished Goods' },
-        { sku: 'PROD-CHANA-RAW', name: 'Raw Unprocessed Chana (کچی چنا)', bagWeight: '100 KG', stockBags: 3400, rate: 6800, category: 'Raw Materials' },
+        { id: '#1', urduName: 'ماش سالم ایس کیو-خام', unit: '50Kg' },
+        { id: '#2', urduName: 'ماش سالم ایف کیو-خام', unit: '50Kg' },
+        { id: '#3', urduName: 'ماش سالم ژوب-خام', unit: '50Kg' },
+        { id: '#4', urduName: 'ماش سالم لورالائی-خام', unit: '50Kg' },
+        { id: '#5', urduName: 'ماش سالم چمن-خام', unit: '50Kg' },
+        { id: '#6', urduName: 'دال ماش ایس کیو', unit: '25Kg' },
+        { id: '#7', urduName: 'دال چنا اسپیشل (A-Grade)', unit: '50Kg' },
+        { id: '#8', urduName: 'دال مونگ پالش', unit: '50Kg' },
       ];
 
       const initialGatePasses = [
         { id: 'GP-4001', truckNo: 'FSD-7892', driver: 'Rashid Khan', type: 'Outward Sale', goods: '250 Bags Daal Chana', netWeight: '12,500 KG', time: '04:30 PM', status: 'Passed' },
-        { id: 'GP-4002', truckNo: 'SGD-4410', driver: 'Kashif Ali', type: 'Inward Purchase', goods: '500 Bags Raw Pulse', netWeight: '50,000 KG', time: '01:15 PM', status: 'Cleared' },
       ];
 
-      // App Component
       const App = () => {
         const [activeTab, setActiveTab] = useState('dashboard');
-        const [lang, setLang] = useState('ur'); // 'ur' or 'en'
         const [searchQuery, setSearchQuery] = useState('');
-        const [selectedDate, setSelectedDate] = useState('2026-07-25');
+        const [workerFilter, setWorkerFilter] = useState('سب'); // 'سب', 'دھلائی', 'دلائی', 'رکشہ والا'
+        const [partyTab, setPartyTab] = useState('parties'); // 'parties' or 'brokers'
 
-        // Dynamic State Storage
+        // State collections
         const [roznamchaList, setRoznamchaList] = useState(initialRoznamcha);
         const [workersList, setWorkersList] = useState(initialWorkers);
         const [purchasesList, setPurchasesList] = useState(initialPurchases);
         const [salesList, setSalesList] = useState(initialSales);
         const [partiesList, setPartiesList] = useState(initialParties);
+        const [brokersList, setBrokersList] = useState(initialBrokers);
         const [productsList, setProductsList] = useState(initialProducts);
         const [gatePassesList, setGatePassesList] = useState(initialGatePasses);
 
-        // Modal Form Controls
-        const [activeModal, setActiveModal] = useState(null); // 'roznamcha', 'worker', 'purchase', 'sale', 'party', 'product', 'gatepass'
+        // Modal Controls
+        const [activeModal, setActiveModal] = useState(null);
 
-        // Form Draft States
+        // Forms
         const [formRoznamcha, setFormRoznamcha] = useState({ party: '', description: '', type: 'Cash Received', amount: '', voucher: '' });
-        const [formWorker, setFormWorker] = useState({ name: '', role: 'Operator', shift: 'Day Shift', dailyWage: '' });
-        const [formPurchase, setFormPurchase] = useState({ supplier: '', item: 'Raw Chana Pulse', bags: '', ratePerMaund: '' });
-        const [formSale, setFormSale] = useState({ customer: '', item: 'Processed Daal Chana (A-Grade)', bags: '', rate: '' });
-        const [formParty, setFormParty] = useState({ name: '', category: 'Customer', city: 'Faisalabad', phone: '', balance: '' });
-        const [formProduct, setFormProduct] = useState({ sku: '', name: '', bagWeight: '50 KG', stockBags: '', rate: '' });
-        const [formGatePass, setFormGatePass] = useState({ truckNo: '', driver: '', type: 'Outward Sale', goods: '', netWeight: '' });
+        const [formWorker, setFormWorker] = useState({ name: '', category: 'دھلائی', phone: '', city: 'فیصل آباد', dailyWage: '' });
+        const [formPurchase, setFormPurchase] = useState({ party: '', product: 'ماش سالم ایس کیو-خام', quantityKg: '', totalAmount: '' });
+        const [formSale, setFormSale] = useState({ party: '', product: 'دال ماش ایس کیو', bags: '', totalAmount: '' });
+        const [formParty, setFormParty] = useState({ name: '', phone: '', city: 'فیصل آباد', type: 'Party' });
+        const [formProduct, setFormProduct] = useState({ urduName: '', unit: '50Kg' });
+        const [formGatePass, setFormGatePass] = useState({ truckNo: '', driver: '', goods: '', netWeight: '' });
 
         useEffect(() => {
           if (window.lucide) {
             window.lucide.createIcons();
           }
-        }, [activeTab, lang, activeModal, roznamchaList, workersList, purchasesList, salesList]);
+        }, [activeTab, workerFilter, partyTab, activeModal, roznamchaList, workersList, purchasesList, salesList, productsList]);
 
-        // Handlers to Add Data
+        // Handlers
         const handleAddRoznamcha = (e) => {
           e.preventDefault();
-          const newEntry = {
+          const entry = {
             id: `ROZ-${Date.now().toString().slice(-4)}`,
-            date: selectedDate,
-            party: formRoznamcha.party || 'General Ledger Party',
-            description: formRoznamcha.description || 'Cash Transaction',
+            date: '2026-07-25',
+            party: formRoznamcha.party,
+            description: formRoznamcha.description,
             type: formRoznamcha.type,
             amount: parseFloat(formRoznamcha.amount) || 0,
             voucher: formRoznamcha.voucher || `V-${Math.floor(1000 + Math.random() * 9000)}`,
           };
-          setRoznamchaList([newEntry, ...roznamchaList]);
+          setRoznamchaList([entry, ...roznamchaList]);
           setActiveModal(null);
           setFormRoznamcha({ party: '', description: '', type: 'Cash Received', amount: '', voucher: '' });
         };
 
         const handleAddWorker = (e) => {
           e.preventDefault();
-          const newWorker = {
-            id: `WRK-${Date.now().toString().slice(-3)}`,
+          const w = {
+            id: (workersList.length + 1).toString(),
             name: formWorker.name,
-            role: formWorker.role,
-            shift: formWorker.shift,
+            category: formWorker.category,
+            phone: formWorker.phone || '0300-0000000',
+            city: formWorker.city,
             dailyWage: parseFloat(formWorker.dailyWage) || 2000,
             attendance: 'Present',
-            status: 'Paid',
           };
-          setWorkersList([...workersList, newWorker]);
+          setWorkersList([...workersList, w]);
           setActiveModal(null);
-          setFormWorker({ name: '', role: 'Operator', shift: 'Day Shift', dailyWage: '' });
+          setFormWorker({ name: '', category: 'دھلائی', phone: '', city: 'فیصل آباد', dailyWage: '' });
         };
 
         const handleAddPurchase = (e) => {
           e.preventDefault();
-          const bags = parseFloat(formPurchase.bags) || 0;
-          const rate = parseFloat(formPurchase.ratePerMaund) || 0;
-          const total = (bags * 1.25) * rate; // maunds conversion approx
-          const newPurchase = {
-            id: `PUR-${Date.now().toString().slice(-3)}`,
-            supplier: formPurchase.supplier || 'Raw Grain Supplier',
-            item: formPurchase.item,
-            bags: bags,
-            ratePerMaund: rate,
-            total: total,
-            date: selectedDate,
-            status: 'Received',
+          const p = {
+            id: (purchasesList.length + 1).toString(),
+            party: formPurchase.party,
+            product: formPurchase.product,
+            quantityKg: parseFloat(formPurchase.quantityKg) || 0,
+            totalAmount: parseFloat(formPurchase.totalAmount) || 0,
+            date: '2026-07-25',
           };
-          setPurchasesList([newPurchase, ...purchasesList]);
+          setPurchasesList([p, ...purchasesList]);
           setActiveModal(null);
-          setFormPurchase({ supplier: '', item: 'Raw Chana Pulse', bags: '', ratePerMaund: '' });
+          setFormPurchase({ party: '', product: 'ماش سالم ایس کیو-خام', quantityKg: '', totalAmount: '' });
         };
 
         const handleAddSale = (e) => {
           e.preventDefault();
-          const bags = parseFloat(formSale.bags) || 0;
-          const rate = parseFloat(formSale.rate) || 0;
-          const total = bags * rate;
-          const newSale = {
-            id: `INV-${Date.now().toString().slice(-3)}`,
-            customer: formSale.customer || 'Wholesale Client',
-            item: formSale.item,
-            bags: bags,
-            rate: rate,
-            total: total,
-            date: selectedDate,
-            status: 'Delivered',
+          const s = {
+            id: (salesList.length + 1).toString(),
+            invoice: `INV-${Math.floor(100 + Math.random() * 900)}`,
+            party: formSale.party,
+            product: formSale.product,
+            bags: parseFloat(formSale.bags) || 0,
+            totalAmount: parseFloat(formSale.totalAmount) || 0,
+            date: '2026-07-25',
           };
-          setSalesList([newSale, ...salesList]);
+          setSalesList([s, ...salesList]);
           setActiveModal(null);
-          setFormSale({ customer: '', item: 'Processed Daal Chana (A-Grade)', bags: '', rate: '' });
+          setFormSale({ party: '', product: 'دال ماش ایس کیو', bags: '', totalAmount: '' });
         };
 
-        const handleAddGatePass = (e) => {
+        const handleAddParty = (e) => {
           e.preventDefault();
-          const newGP = {
-            id: `GP-${Date.now().toString().slice(-4)}`,
-            truckNo: formGatePass.truckNo || 'FSD-1090',
-            driver: formGatePass.driver || 'Driver Express',
-            type: formGatePass.type,
-            goods: formGatePass.goods || 'Daal Pulse Bags',
-            netWeight: formGatePass.netWeight || '10,000 KG',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: 'Cleared',
+          const prt = {
+            id: (partiesList.length + 1).toString(),
+            name: formParty.name,
+            phone: formParty.phone || '0300-1122334',
+            city: formParty.city,
+            type: formParty.type,
+            balance: 0,
           };
-          setGatePassesList([newGP, ...gatePassesList]);
+          if (formParty.type === 'Broker') {
+            setBrokersList([...brokersList, { id: prt.id, name: prt.name, code: 'بروکر کھاتہ', rate: 'Current Rate: 0', type: 'Broker' }]);
+          } else {
+            setPartiesList([...partiesList, prt]);
+          }
           setActiveModal(null);
-          setFormGatePass({ truckNo: '', driver: '', type: 'Outward Sale', goods: '', netWeight: '' });
+          setFormParty({ name: '', phone: '', city: 'فیصل آباد', type: 'Party' });
+        };
+
+        const handleAddProduct = (e) => {
+          e.preventDefault();
+          const prd = {
+            id: `#${productsList.length + 1}`,
+            urduName: formProduct.urduName,
+            unit: formProduct.unit,
+          };
+          setProductsList([...productsList, prd]);
+          setActiveModal(null);
+          setFormProduct({ urduName: '', unit: '50Kg' });
+        };
+
+        const handleDeleteProduct = (id) => {
+          setProductsList(productsList.filter(p => p.id !== id));
         };
 
         // Calculations
@@ -240,9 +248,16 @@
         const totalCashPaid = roznamchaList.filter(r => r.type === 'Cash Paid').reduce((acc, r) => acc + r.amount, 0);
         const openingRokar = 500000;
         const currentRokar = openingRokar + totalCashReceived - totalCashPaid;
-        const totalStockBags = productsList.reduce((acc, p) => acc + p.stockBags, 0);
 
-        // Sidebar Navigation Configuration
+        const dhulaiCount = workersList.filter(w => w.category === 'دھلائی').length;
+        const dalaiCount = workersList.filter(w => w.category === 'دلائی').length;
+        const presentCount = workersList.filter(w => w.attendance === 'Present').length;
+
+        const totalPurchaseQty = purchasesList.reduce((acc, p) => acc + p.quantityKg, 0);
+        const totalPurchaseAmount = purchasesList.reduce((acc, p) => acc + p.totalAmount, 0);
+
+        const totalSalesAmount = salesList.reduce((acc, s) => acc + s.totalAmount, 0);
+
         const navItems = [
           { id: 'dashboard', labelEn: 'Dashboard', labelUr: 'خلاصہ', icon: 'layout-dashboard' },
           { id: 'daybook', labelEn: 'Day-Book', labelUr: 'روزنامچہ', icon: 'book-open' },
@@ -257,21 +272,23 @@
         ];
 
         return (
-          <div className="flex min-h-screen bg-dark-950 text-slate-100">
-            {/* Sidebar */}
+          <div className="flex min-h-screen bg-dark-950 text-slate-100 font-sans">
+            {/* Left Sidebar */}
             <aside className="w-64 bg-dark-900 border-r border-dark-800 flex flex-col h-screen sticky top-0 z-30">
-              <div className="p-4 border-b border-dark-800 flex items-center gap-3 bg-dark-950/40">
-                <div className="p-2.5 bg-brand-500 rounded-xl text-black font-bold shadow-lg shadow-brand-500/20">
-                  <i data-lucide="factory" className="w-6 h-6"></i>
+              <div className="p-4 border-b border-dark-800 flex items-center justify-between bg-dark-950/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-brand-500 rounded-xl text-black font-bold shadow-lg shadow-brand-500/20">
+                    <i data-lucide="factory" className="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <h1 className="font-display font-bold text-sm text-brand-500 tracking-tight leading-tight">Muhammad Daal Factory</h1>
+                    <p className="text-[11px] text-slate-400 font-medium">Chohla, Faisalabad</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="font-display font-bold text-sm text-brand-500 tracking-tight leading-tight">Muhammad Daal Factory</h1>
-                  <p className="text-[11px] text-slate-400 font-medium">Chak 230 RB Chohla, Faisalabad</p>
-                </div>
+                <i data-lucide="chevron-left" className="w-4 h-4 text-slate-500 cursor-pointer"></i>
               </div>
 
-              {/* Sidebar Menu Links */}
-              <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
+              <nav className="flex-1 overflow-y-auto p-3 space-y-1">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
                   return (
@@ -294,76 +311,59 @@
                 })}
               </nav>
 
-              {/* Sidebar Profile Card & Language Switcher */}
-              <div className="p-3 border-t border-dark-800 bg-dark-950/60 space-y-2">
-                <button
-                  onClick={() => setLang(lang === 'ur' ? 'en' : 'ur')}
-                  className="w-full py-1.5 px-3 bg-dark-800 hover:bg-dark-750 border border-dark-700 text-brand-500 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors"
-                >
-                  <i data-lucide="languages" className="w-3.5 h-3.5"></i>
-                  <span>{lang === 'ur' ? 'English View' : 'اردو ڈسپلے'}</span>
-                </button>
-
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-2.5 overflow-hidden">
-                    <div className="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center font-bold text-xs border border-brand-500/40">
-                      A
-                    </div>
-                    <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-slate-100 truncate">Abdullah Dilbar</p>
-                      <p className="text-[10px] text-slate-400 truncate">Proprietor / Administrator</p>
-                    </div>
+              <div className="p-4 border-t border-dark-800 bg-dark-950/60 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center font-bold text-xs border border-brand-500/40">
+                    A
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-100">Abdullah Dilbar</p>
+                    <p className="text-[10px] text-slate-400">Proprietor</p>
                   </div>
                 </div>
+                <i data-lucide="chevron-down" className="w-4 h-4 text-slate-500"></i>
               </div>
             </aside>
 
-            {/* Main Application Container */}
+            {/* Main Workspace */}
             <div className="flex-1 flex flex-col min-w-0">
               {/* Header Bar */}
               <header className="h-16 bg-dark-900/90 backdrop-blur border-b border-dark-800 px-6 flex items-center justify-between sticky top-0 z-20">
                 <div>
-                  <h2 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
-                    <span>Muhammad Daal Factory</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-500 border border-brand-500/30 font-mono">Faisalabad, PK</span>
-                  </h2>
+                  <h2 className="text-base font-bold text-slate-100 font-display">Muhammad Daal Factory</h2>
                   <p className="text-xs text-slate-400">Chak 230 RB Chohla, Jhang Road Faisalabad</p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-dark-950 border border-dark-800 rounded-lg text-xs text-slate-300 font-mono">
-                    <i data-lucide="calendar" className="w-3.5 h-3.5 text-brand-500"></i>
-                    <span>{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+                    <span>25-Jul-2026 • 17:50</span>
                   </div>
 
-                  <a href="tel:03000676293" className="hidden md:flex items-center gap-2 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-500 rounded-lg text-xs font-bold">
+                  <a href="tel:03000676293" className="flex items-center gap-2 px-3 py-1 bg-dark-950 border border-dark-800 text-brand-500 rounded-lg text-xs font-bold">
                     <i data-lucide="phone" className="w-3.5 h-3.5"></i>
                     <span>0300-0676293</span>
                   </a>
 
                   <div className="flex items-center gap-2 px-3 py-1 bg-dark-800 rounded-lg border border-dark-700 text-xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span className="w-2 h-2 rounded-full bg-brand-500"></span>
                     <span className="font-bold text-slate-200">Administrator</span>
                   </div>
                 </div>
               </header>
 
-              {/* Main Content Area */}
+              {/* Main Content Pages */}
               <main className="flex-1 p-6 overflow-y-auto">
-                {/* 1. DASHBOARD TAB */}
+                {/* 1. DASHBOARD */}
                 {activeTab === 'dashboard' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خلاصہ — Executive Overview</h1>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => setActiveModal('roznamcha')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
-                          <i data-lucide="plus" className="w-4 h-4"></i>
-                          <span>+ نئ اندراج (Add Entry)</span>
-                        </button>
-                      </div>
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خلاصہ</h1>
+                      <button onClick={() => setActiveModal('roznamcha')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نئی اندراج</span>
+                      </button>
                     </div>
 
-                    {/* Current Cash Balance Roznamcha Header Card */}
                     <div className="bg-gradient-to-r from-brand-900/40 via-dark-900 to-dark-900 border border-brand-500/40 rounded-2xl p-6 glow-card">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -371,187 +371,527 @@
                             <i data-lucide="wallet" className="w-8 h-8"></i>
                           </div>
                           <div>
-                            <h2 className="text-2xl font-bold text-brand-500 font-nastaliq">موجودہ روکڑ — Current Cash Balance</h2>
-                            <p className="text-xs text-slate-400 mt-0.5">Roznamcha Net Operational Ledger Balance</p>
+                            <h2 className="text-2xl font-bold text-brand-500 font-nastaliq">موجودہ روکڑ</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Current Cash Balance — Roznamcha</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <span className="text-4xl font-bold font-display text-brand-500 tracking-tight">PKR {currentRokar.toLocaleString()}</span>
-                          <p className="text-xs text-slate-400 mt-1 font-nastaliq">صاف شدہ نقد رقم (Verified Cash Balance)</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* 3 Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
                         <div className="flex items-center justify-between pb-3 border-b border-dark-800">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Receivable</span>
-                          <span className="text-base font-bold text-sky-400 font-nastaliq">وصولی</span>
+                          <span className="text-xs font-bold text-slate-300">Receivable</span>
+                          <span className="text-sm font-bold text-sky-400 font-nastaliq">وصولی</span>
                         </div>
-                        <div className="mt-4 space-y-2 text-xs">
-                          <div className="flex justify-between text-slate-400"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
-                          <div className="flex justify-between text-slate-400"><span>Total Overdue</span><span className="font-bold text-white font-mono">PKR 0</span></div>
+                        <div className="mt-4 space-y-2 text-xs text-slate-400">
+                          <div className="flex justify-between"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
+                          <div className="flex justify-between"><span>Total Overdue Amount</span><span className="font-bold text-white font-mono">0</span></div>
                           <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
                             <span>Net Receivable</span>
-                            <span className="font-mono text-sky-400">PKR 820,000</span>
+                            <span className="font-mono text-sky-400">0</span>
                           </div>
+                          <p className="mt-3 text-center text-slate-500 font-nastaliq">کوئی واجب الادا بل نہیں</p>
                         </div>
                       </div>
 
-                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
                         <div className="flex items-center justify-between pb-3 border-b border-dark-800">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payable</span>
-                          <span className="text-base font-bold text-amber-400 font-nastaliq">ادائیگی</span>
+                          <span className="text-xs font-bold text-slate-300">Payable</span>
+                          <span className="text-sm font-bold text-amber-400 font-nastaliq">ادائیگی</span>
                         </div>
-                        <div className="mt-4 space-y-2 text-xs">
-                          <div className="flex justify-between text-slate-400"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
-                          <div className="flex justify-between text-slate-400"><span>Total Overdue</span><span className="font-bold text-white font-mono">PKR 0</span></div>
+                        <div className="mt-4 space-y-2 text-xs text-slate-400">
+                          <div className="flex justify-between"><span>Overdue Bills</span><span className="font-bold text-white font-mono">0</span></div>
+                          <div className="flex justify-between"><span>Total Overdue Amount</span><span className="font-bold text-white font-mono">0</span></div>
                           <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
                             <span>Net Payable</span>
-                            <span className="font-mono text-amber-400">PKR 485,000</span>
+                            <span className="font-mono text-amber-400">0</span>
                           </div>
+                          <p className="mt-3 text-center text-slate-500 font-nastaliq">کوئی واجب الادا بل نہیں</p>
                         </div>
                       </div>
 
-                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
                         <div className="flex items-center justify-between pb-3 border-b border-dark-800">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stock Balance</span>
-                          <span className="text-base font-bold text-emerald-400 font-nastaliq">اسٹاک / مال</span>
+                          <span className="text-xs font-bold text-slate-300">Stock</span>
+                          <span className="text-sm font-bold text-emerald-400 font-nastaliq">اسٹاک</span>
                         </div>
-                        <div className="mt-4 space-y-2 text-xs">
-                          <div className="flex justify-between text-slate-400"><span>Total Purchases In</span><span className="font-bold text-white font-mono">800 Bags</span></div>
-                          <div className="flex justify-between text-slate-400"><span>Total Sales Out</span><span className="font-bold text-white font-mono">400 Bags</span></div>
+                        <div className="mt-4 space-y-2 text-xs text-slate-400">
+                          <div className="flex justify-between"><span>Total Purchases In</span><span className="font-bold text-white font-mono">0</span></div>
+                          <div className="flex justify-between"><span>Total Sales Out</span><span className="font-bold text-white font-mono">-0</span></div>
                           <div className="pt-2 border-t border-dark-800 flex justify-between font-bold text-slate-200">
-                            <span>Warehouse Stock</span>
-                            <span className="font-mono text-emerald-400">{totalStockBags.toLocaleString()} Bags</span>
+                            <span>Stock Balance</span>
+                            <span className="font-mono text-emerald-400">0</span>
                           </div>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Live Machinery Status */}
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl p-6">
-                      <div className="flex items-center justify-between pb-4 border-b border-dark-800">
-                        <div className="flex items-center gap-2">
-                          <i data-lucide="cpu" className="w-5 h-5 text-brand-500"></i>
-                          <h3 className="font-bold text-slate-100 font-display">Chana & Moong Milling Lines Live Telemetry</h3>
-                        </div>
-                        <span className="text-xs text-slate-400 font-mono">4 Processing Plants Operational</span>
-                      </div>
-
-                      <div className="mt-4 divide-y divide-dark-800">
-                        {[
-                          { name: 'چنا دال ڈی ہسکر اینڈ سپلیٹنگ مل (Chana De-Husker)', status: 'Operational (فعال)', note: 'Processing 12.5 Tons/hr', color: 'emerald' },
-                          { name: 'مونگ دال واشنگ اینڈ پولشنگ یونٹ (Moong Polisher)', status: 'Maintenance (ترمیم)', note: 'Sieve Screen Cleaning', color: 'amber' },
-                          { name: 'آٹومیٹک گریڈر اینڈ ویٹ پیکنگ لائن 1', status: 'Operational (فعال)', note: '50 KG Bagging Line Active', color: 'emerald' },
-                        ].map((m, i) => (
-                          <div key={i} className="py-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className={`w-2.5 h-2.5 rounded-full ${m.color === 'emerald' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-                              <div>
-                                <p className="text-xs font-bold text-slate-200 font-nastaliq">{m.name}</p>
-                                <p className="text-[11px] text-slate-400">{m.note}</p>
-                              </div>
-                            </div>
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${m.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
-                              {m.status}
-                            </span>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 2. DAY-BOOK (روزنامچہ) TAB */}
+                {/* 2. DAY-BOOK (روزنامچہ) */}
                 {activeTab === 'daybook' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">روزنامچہ — Roznamcha Ledger</h1>
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">روزنامچہ</h1>
                       <button onClick={() => setActiveModal('roznamcha')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
                         <i data-lucide="plus" className="w-4 h-4"></i>
-                        <span>+ نئی اندراج (Add Entry)</span>
+                        <span>+ نئی اندراج</span>
                       </button>
                     </div>
 
-                    {/* 5 KPI Stat Cards like Screenshot */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
-                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">ابتدائی روکڑ</span>
-                        <p className="text-xs text-slate-500">Opening Rokar</p>
-                        <h4 className="text-lg font-bold font-display text-sky-400 mt-2">PKR {openingRokar.toLocaleString()}</h4>
+                        <span className="text-sm font-bold text-slate-300 block font-nastaliq">ابتدائی روکڑ</span>
+                        <p className="text-[11px] text-slate-500">Opening Rokar</p>
+                        <h4 className="text-lg font-bold font-display text-sky-400 mt-2">{openingRokar}</h4>
                       </div>
                       <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
-                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">جمع کیش</span>
-                        <p className="text-xs text-slate-500">Cash Received</p>
-                        <h4 className="text-lg font-bold font-display text-emerald-400 mt-2">PKR {totalCashReceived.toLocaleString()}</h4>
+                        <span className="text-sm font-bold text-slate-300 block font-nastaliq">جمع کیش</span>
+                        <p className="text-[11px] text-slate-500">Cash Received</p>
+                        <h4 className="text-lg font-bold font-display text-emerald-400 mt-2">{totalCashReceived}</h4>
                       </div>
                       <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
-                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">بنام کیش</span>
-                        <p className="text-xs text-slate-500">Cash Paid</p>
-                        <h4 className="text-lg font-bold font-display text-rose-400 mt-2">PKR {totalCashPaid.toLocaleString()}</h4>
+                        <span className="text-sm font-bold text-slate-300 block font-nastaliq">بنام کیش</span>
+                        <p className="text-[11px] text-slate-500">Cash Paid</p>
+                        <h4 className="text-lg font-bold font-display text-rose-400 mt-2">{totalCashPaid}</h4>
                       </div>
                       <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
-                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">موجودہ روکڑ</span>
-                        <p className="text-xs text-slate-500">Current Rokar</p>
-                        <h4 className="text-lg font-bold font-display text-brand-500 mt-2">PKR {currentRokar.toLocaleString()}</h4>
+                        <span className="text-sm font-bold text-slate-300 block font-nastaliq">موجودہ روکڑ</span>
+                        <p className="text-[11px] text-slate-500">Current Rokar</p>
+                        <h4 className="text-lg font-bold font-display text-brand-500 mt-2">{currentRokar}</h4>
                       </div>
                       <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 col-span-2 md:col-span-1">
-                        <span className="text-[11px] font-bold text-slate-400 block font-nastaliq">سوڑی کھاتہ</span>
-                        <p className="text-xs text-slate-500">Sori Khata</p>
-                        <h4 className="text-lg font-bold font-display text-purple-400 mt-2">PKR 0</h4>
+                        <span className="text-sm font-bold text-slate-300 block font-nastaliq">سوڑی کھاتہ</span>
+                        <p className="text-[11px] text-slate-500">Sori Khata</p>
+                        <h4 className="text-lg font-bold font-display text-purple-400 mt-2">0 <span className="text-xs font-normal text-slate-400">بوری</span></h4>
                       </div>
                     </div>
 
-                    {/* Controls Bar: Date Picker & Search Bar */}
                     <div className="flex flex-col sm:flex-row items-center gap-4 bg-dark-900 p-3 rounded-xl border border-dark-800">
-                      <div className="flex items-center gap-2 bg-dark-950 px-3 py-2 rounded-lg border border-dark-800">
+                      <div className="flex items-center gap-2 bg-dark-950 px-3 py-2 rounded-lg border border-dark-800 text-xs">
                         <i data-lucide="calendar" className="w-4 h-4 text-brand-500"></i>
-                        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-transparent text-xs font-mono text-slate-200 outline-none" />
+                        <span>07/25/2026</span>
                       </div>
-
                       <div className="flex-1 relative w-full">
                         <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
                         <input
                           type="text"
-                          placeholder="تلاش کریں — پارٹی نام، تفصیل، واؤچر..."
+                          placeholder="تلاش کریں— پارٹی نام، تفصیل، واؤچر..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full bg-dark-950 border border-dark-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-brand-500 font-nastaliq"
+                          className="w-full bg-dark-950 border border-dark-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none font-nastaliq"
                         />
                       </div>
                     </div>
 
-                    {/* Roznamcha Ledger Table */}
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden shadow-xl">
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="p-4">Voucher / ID</th>
+                            <th className="p-4">Voucher</th>
                             <th className="p-4">Date</th>
                             <th className="p-4">Party Name</th>
                             <th className="p-4">Description</th>
-                            <th className="p-4">Transaction Type</th>
-                            <th className="p-4 text-right">Amount (PKR)</th>
+                            <th className="p-4">Type</th>
+                            <th className="p-4 text-right">Amount</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-800 text-xs">
-                          {roznamchaList
-                            .filter(r => r.party.toLowerCase().includes(searchQuery.toLowerCase()) || r.description.toLowerCase().includes(searchQuery.toLowerCase()))
-                            .map((r, i) => (
-                              <tr key={i} className="hover:bg-dark-850/60 transition-colors">
-                                <td className="p-4 font-mono font-bold text-brand-500">{r.voucher}</td>
-                                <td className="p-4 font-mono text-slate-400">{r.date}</td>
-                                <td className="p-4 font-bold text-slate-200 font-nastaliq">{r.party}</td>
-                                <td className="p-4 text-slate-300">{r.description}</td>
+                          {roznamchaList.map((r, i) => (
+                            <tr key={i} className="hover:bg-dark-850/60">
+                              <td className="p-4 font-mono font-bold text-brand-500">{r.voucher}</td>
+                              <td className="p-4 font-mono text-slate-400">{r.date}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{r.party}</td>
+                              <td className="p-4 text-slate-300">{r.description}</td>
+                              <td className="p-4 font-bold text-emerald-400">{r.type}</td>
+                              <td className="p-4 text-right font-bold font-mono">PKR {r.amount.toLocaleString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. WORKERS (ورکرز) matching Screenshot 1 */}
+                {activeTab === 'workers' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">ورکرز</h1>
+                        <p className="text-xs text-slate-400 font-nastaliq mt-1">دھلائی اور دلائی ورکرز کا حساب کتاب</p>
+                      </div>
+                      <button onClick={() => setActiveModal('worker')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20 font-nastaliq">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ نیا ورکر شامل کریں</span>
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                      <input
+                        type="text"
+                        placeholder="...نام، شہر یا فون سے تلاش کریں"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark-900 border border-dark-800 rounded-xl pl-9 pr-4 py-3 text-xs text-slate-100 placeholder-slate-500 outline-none font-nastaliq"
+                      />
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div className="flex items-center gap-2 text-xs font-nastaliq">
+                      <span className="text-slate-400">قسم:</span>
+                      {['سب', 'دھلائی', 'دلائی', 'رکشہ والا'].map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setWorkerFilter(f)}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            workerFilter === f ? 'bg-brand-500 text-black' : 'bg-dark-800 text-slate-300 hover:bg-dark-750'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 4 Stat Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 flex items-center justify-between">
+                        <span className="text-2xl font-bold font-mono text-sky-400">{workersList.length}</span>
+                        <span className="text-xs font-bold text-slate-300 font-nastaliq">کل ورکرز</span>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 flex items-center justify-between">
+                        <span className="text-2xl font-bold font-mono text-emerald-400">{dhulaiCount}</span>
+                        <span className="text-xs font-bold text-slate-300 font-nastaliq">دھلائی والے</span>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 flex items-center justify-between">
+                        <span className="text-2xl font-bold font-mono text-amber-400">{dalaiCount}</span>
+                        <span className="text-xs font-bold text-slate-300 font-nastaliq">دلائی والے</span>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4 flex items-center justify-between">
+                        <span className="text-2xl font-bold font-mono text-purple-400">{presentCount}</span>
+                        <span className="text-xs font-bold text-slate-300 font-nastaliq">آج حاضر</span>
+                      </div>
+                    </div>
+
+                    {/* Worker List or Empty State */}
+                    {workersList.filter(w => workerFilter === 'سب' || w.category === workerFilter).length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {workersList
+                          .filter(w => workerFilter === 'سب' || w.category === workerFilter)
+                          .map((w) => (
+                            <div key={w.id} className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs px-2.5 py-0.5 rounded bg-brand-500/10 text-brand-500 font-bold font-nastaliq">{w.category}</span>
+                                <span className="text-xs text-emerald-400 font-bold">{w.attendance}</span>
+                              </div>
+                              <h3 className="font-bold text-slate-100 text-base mt-2 font-nastaliq">{w.name}</h3>
+                              <p className="text-xs text-slate-400">{w.city} • {w.phone}</p>
+                              <div className="mt-4 pt-3 border-t border-dark-800 flex justify-between text-xs">
+                                <span className="text-slate-400">Daily Wage:</span>
+                                <span className="font-bold font-mono text-slate-100">PKR {w.dailyWage}</span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="bg-dark-900 border border-dark-800 rounded-2xl p-12 text-center space-y-4">
+                        <div className="w-16 h-16 bg-dark-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                          <i data-lucide="users" className="w-8 h-8"></i>
+                        </div>
+                        <h3 className="text-xl font-bold font-nastaliq text-slate-200">کوئی ورکر نہیں ملا</h3>
+                        <p className="text-xs text-slate-400 font-nastaliq">نیا ورکر شامل کریں</p>
+                        <button onClick={() => setActiveModal('worker')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-6 py-2.5 rounded-xl inline-flex items-center gap-2 font-nastaliq">
+                          <i data-lucide="plus" className="w-4 h-4"></i>
+                          <span>نیا ورکر شامل کریں</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 4. PURCHASE (خرید) matching Screenshot 2 */}
+                {activeTab === 'purchase' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خرید</h1>
+                      <button onClick={() => setActiveModal('purchase')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ New Purchase</span>
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                      <input
+                        type="text"
+                        placeholder="Search purchases by party or product name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark-900 border border-dark-800 rounded-xl pl-9 pr-4 py-3 text-xs text-slate-100 placeholder-slate-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+                        <h3 className="text-2xl font-bold font-mono text-slate-100">{purchasesList.length}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Total Records</p>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+                        <h3 className="text-2xl font-bold font-mono text-emerald-400">{totalPurchaseQty} kg</h3>
+                        <p className="text-xs text-slate-400 mt-1">Total Quantity</p>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+                        <h3 className="text-2xl font-bold font-mono text-brand-500">PKR {totalPurchaseAmount.toLocaleString()}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Total Amount</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">ID</th>
+                            <th className="p-4">Supplier Party</th>
+                            <th className="p-4">Product Name</th>
+                            <th className="p-4">Quantity (KG)</th>
+                            <th className="p-4 text-right">Total Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {purchasesList.map((p) => (
+                            <tr key={p.id} className="hover:bg-dark-850/60">
+                              <td className="p-4 font-mono font-bold text-brand-500">#{p.id}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{p.party}</td>
+                              <td className="p-4 text-slate-300 font-nastaliq">{p.product}</td>
+                              <td className="p-4 font-mono font-bold text-slate-100">{p.quantityKg.toLocaleString()} KG</td>
+                              <td className="p-4 text-right font-mono font-bold text-emerald-400">PKR {p.totalAmount.toLocaleString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. SALE (فروخت) matching Screenshot 3 */}
+                {activeTab === 'sale' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">فروخت</h1>
+                      <button onClick={() => setActiveModal('sale')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ New Sale</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 flex items-center gap-4">
+                      <div className="p-3 bg-brand-500/10 text-brand-500 rounded-xl border border-brand-500/20">
+                        <i data-lucide="trending-up" className="w-6 h-6"></i>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">Total Sales Amount</p>
+                        <h3 className="text-3xl font-bold font-display text-brand-500 mt-0.5">PKR {totalSalesAmount.toLocaleString()}</h3>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                      <input
+                        type="text"
+                        placeholder="Search by invoice, party, product or broker..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark-900 border border-dark-800 rounded-xl pl-9 pr-4 py-3 text-xs text-slate-100 placeholder-slate-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">Invoice</th>
+                            <th className="p-4">Customer Party</th>
+                            <th className="p-4">Product Name</th>
+                            <th className="p-4">Bags Count</th>
+                            <th className="p-4 text-right">Total Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {salesList.map((s) => (
+                            <tr key={s.id} className="hover:bg-dark-850/60">
+                              <td className="p-4 font-mono font-bold text-brand-500">{s.invoice}</td>
+                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{s.party}</td>
+                              <td className="p-4 text-slate-300 font-nastaliq">{s.product}</td>
+                              <td className="p-4 font-mono font-bold text-slate-100">{s.bags} Bags</td>
+                              <td className="p-4 text-right font-mono font-bold text-sky-400">PKR {s.totalAmount.toLocaleString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. PARTIES (پارٹیز) matching Screenshot 4 */}
+                {activeTab === 'parties' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">پارٹیز</h1>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => setActiveModal('party')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2">
+                          <i data-lucide="plus" className="w-4 h-4"></i>
+                          <span>+ Add Party</span>
+                        </button>
+                        <button onClick={() => setActiveModal('party')} className="bg-dark-800 hover:bg-dark-750 text-slate-200 border border-dark-700 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2">
+                          <i data-lucide="user-plus" className="w-4 h-4"></i>
+                          <span>+ Add Broker</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                      <input
+                        type="text"
+                        placeholder="Search parties or brokers by name, phone..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark-900 border border-dark-800 rounded-xl pl-9 pr-4 py-3 text-xs text-slate-100 placeholder-slate-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <h3 className="text-xl font-bold font-mono text-slate-100">{partiesList.length}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Total Parties</p>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <h3 className="text-xl font-bold font-mono text-brand-500">{brokersList.length}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Total Brokers</p>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <h3 className="text-xl font-bold font-mono text-emerald-400">{partiesList.length}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Parties Shown</p>
+                      </div>
+                      <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+                        <h3 className="text-xl font-bold font-mono text-sky-400">{brokersList.length}</h3>
+                        <p className="text-xs text-slate-400 mt-1">Brokers Shown</p>
+                      </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPartyTab('parties')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                          partyTab === 'parties' ? 'bg-brand-500 text-black' : 'bg-dark-900 border border-dark-800 text-slate-300'
+                        }`}
+                      >
+                        Parties ({partiesList.length})
+                      </button>
+                      <button
+                        onClick={() => setPartyTab('brokers')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                          partyTab === 'brokers' ? 'bg-brand-500 text-black' : 'bg-dark-900 border border-dark-800 text-slate-300'
+                        }`}
+                      >
+                        Brokers ({brokersList.length})
+                      </button>
+                    </div>
+
+                    {/* Sori Khata & Broker Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {partyTab === 'brokers' && brokersList.map((b, i) => (
+                        <div key={i} className="bg-dark-900 border-2 border-brand-500/50 rounded-2xl p-5 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-brand-500/20 text-brand-500 rounded-xl">
+                              <i data-lucide="calculator" className="w-6 h-6"></i>
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-slate-100 font-nastaliq">{b.name}</h3>
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-500 border border-brand-500/30 font-nastaliq">{b.code}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-400 font-mono">{b.rate}</p>
+                          <button className="w-full py-2 bg-dark-950 hover:bg-dark-800 border border-dark-800 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 font-nastaliq">
+                            <i data-lucide="eye" className="w-4 h-4 text-brand-500"></i>
+                            <span>سوڑی کھاتہ دیکھیں</span>
+                          </button>
+                        </div>
+                      ))}
+
+                      {partyTab === 'parties' && partiesList.map((p) => (
+                        <div key={p.id} className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+                          <h3 className="font-bold text-slate-100 text-base font-nastaliq">{p.name}</h3>
+                          <p className="text-xs text-slate-400">{p.city} • {p.phone}</p>
+                          <div className="mt-4 pt-3 border-t border-dark-800 flex justify-between text-xs">
+                            <span className="text-slate-400">Balance:</span>
+                            <span className="font-bold font-mono text-emerald-400">PKR {p.balance}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. PRODUCTS (اشیاء) matching Screenshot 5 */}
+                {activeTab === 'products' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">اشیاء</h1>
+                      <button onClick={() => setActiveModal('product')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" className="w-4 h-4"></i>
+                        <span>+ Add Product</span>
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <i data-lucide="search" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                      <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark-900 border border-dark-800 rounded-xl pl-9 pr-4 py-3 text-xs text-slate-100 placeholder-slate-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th className="p-4">ID</th>
+                            <th className="p-4">اردو نام</th>
+                            <th className="p-4">UNIT</th>
+                            <th className="p-4 text-right">ACTIONS</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-800 text-xs">
+                          {productsList
+                            .filter(p => p.urduName.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map((prd) => (
+                              <tr key={prd.id} className="hover:bg-dark-850/60">
+                                <td className="p-4 font-mono font-bold text-brand-500">{prd.id}</td>
+                                <td className="p-4 font-bold text-slate-100 font-nastaliq text-sm">{prd.urduName}</td>
                                 <td className="p-4">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${r.type === 'Cash Received' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>
-                                    {r.type}
+                                  <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold font-mono">
+                                    {prd.unit}
                                   </span>
                                 </td>
-                                <td className={`p-4 text-right font-bold font-display text-sm ${r.type === 'Cash Received' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                  {r.type === 'Cash Received' ? '+' : '-'} PKR {r.amount.toLocaleString()}
+                                <td className="p-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button className="p-1.5 text-slate-400 hover:text-brand-500">
+                                      <i data-lucide="edit-3" className="w-4 h-4"></i>
+                                    </button>
+                                    <button onClick={() => handleDeleteProduct(prd.id)} className="p-1.5 text-slate-400 hover:text-rose-400">
+                                      <i data-lucide="trash-2" className="w-4 h-4"></i>
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -560,252 +900,10 @@
                     </div>
                   </div>
                 )}
-
-                {/* 3. WORKERS (کارکنان) TAB */}
-                {activeTab === 'workers' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">کارکنان — Mill Workers & Payroll</h1>
-                      <button onClick={() => setActiveModal('worker')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
-                        <i data-lucide="user-plus" className="w-4 h-4"></i>
-                        <span>+ نیا کارکن (Add Worker)</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="p-4">Worker ID</th>
-                            <th className="p-4">Worker Name</th>
-                            <th className="p-4">Role / Duty</th>
-                            <th className="p-4">Shift</th>
-                            <th className="p-4">Daily Wage</th>
-                            <th className="p-4">Today Attendance</th>
-                            <th className="p-4 text-right">Payment Status</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-dark-800 text-xs">
-                          {workersList.map((w, i) => (
-                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
-                              <td className="p-4 font-mono text-brand-500 font-bold">{w.id}</td>
-                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{w.name}</td>
-                              <td className="p-4 text-slate-300">{w.role}</td>
-                              <td className="p-4 text-slate-400">{w.shift}</td>
-                              <td className="p-4 font-mono font-bold text-slate-100">PKR {w.dailyWage.toLocaleString()} / day</td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${w.attendance === 'Present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}`}>
-                                  {w.attendance}
-                                </span>
-                              </td>
-                              <td className="p-4 text-right">
-                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${w.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
-                                  {w.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. PURCHASE (خرید) TAB */}
-                {activeTab === 'purchase' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">خرید — Raw Grain Purchases</h1>
-                      <button onClick={() => setActiveModal('purchase')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
-                        <i data-lucide="plus" className="w-4 h-4"></i>
-                        <span>+ نیا اینوائس (New Purchase Order)</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="p-4">PO Number</th>
-                            <th className="p-4">Supplier Party</th>
-                            <th className="p-4">Item Name</th>
-                            <th className="p-4">Bags Quantity</th>
-                            <th className="p-4">Rate / Maund (40KG)</th>
-                            <th className="p-4">Total Amount (PKR)</th>
-                            <th className="p-4 text-right">Delivery Status</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-dark-800 text-xs">
-                          {purchasesList.map((p, i) => (
-                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
-                              <td className="p-4 font-mono font-bold text-brand-500">{p.id}</td>
-                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{p.supplier}</td>
-                              <td className="p-4 text-slate-300 font-semibold">{p.item}</td>
-                              <td className="p-4 font-bold text-slate-100 font-mono">{p.bags} Bags</td>
-                              <td className="p-4 font-mono text-slate-300">PKR {p.ratePerMaund.toLocaleString()}</td>
-                              <td className="p-4 font-bold font-display text-emerald-400">PKR {p.total.toLocaleString()}</td>
-                              <td className="p-4 text-right">
-                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${p.status === 'Received' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
-                                  {p.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* 5. SALE (فروخت) TAB */}
-                {activeTab === 'sale' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">فروخت — Finished Goods Sales</h1>
-                      <button onClick={() => setActiveModal('sale')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
-                        <i data-lucide="plus" className="w-4 h-4"></i>
-                        <span>+ نیا سیل بل (Create Invoice)</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="p-4">Invoice No</th>
-                            <th className="p-4">Customer Party</th>
-                            <th className="p-4">Finished Product</th>
-                            <th className="p-4">Bags Count</th>
-                            <th className="p-4">Rate / Bag</th>
-                            <th className="p-4">Total Amount (PKR)</th>
-                            <th className="p-4 text-right">Dispatch Status</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-dark-800 text-xs">
-                          {salesList.map((s, i) => (
-                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
-                              <td className="p-4 font-mono font-bold text-brand-500">{s.id}</td>
-                              <td className="p-4 font-bold text-slate-200 font-nastaliq">{s.customer}</td>
-                              <td className="p-4 text-slate-300 font-semibold">{s.item}</td>
-                              <td className="p-4 font-bold text-slate-100 font-mono">{s.bags} Bags</td>
-                              <td className="p-4 font-mono text-slate-300">PKR {s.rate.toLocaleString()}</td>
-                              <td className="p-4 font-bold font-display text-sky-400">PKR {s.total.toLocaleString()}</td>
-                              <td className="p-4 text-right">
-                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${s.status === 'Delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-sky-500/10 text-sky-400 border-sky-500/30'}`}>
-                                  {s.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* 6. PARTIES (پارٹیز) TAB */}
-                {activeTab === 'parties' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">پارٹیز — Suppliers & Customer Accounts</h1>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {partiesList.map((p, i) => (
-                        <div key={i} className="bg-dark-900 border border-dark-800 rounded-xl p-5 glow-card">
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs text-brand-500 font-bold">{p.id}</span>
-                            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${p.type === 'Receivable' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
-                              {p.type}
-                            </span>
-                          </div>
-                          <h3 className="font-bold text-slate-100 text-base mt-2 font-nastaliq">{p.name}</h3>
-                          <p className="text-xs text-slate-400">{p.city} • {p.phone}</p>
-                          <div className="mt-4 pt-3 border-t border-dark-800 flex justify-between items-center text-xs">
-                            <span className="text-slate-400">Current Balance:</span>
-                            <span className="font-bold font-display text-sm text-slate-100">PKR {p.balance.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 7. PRODUCTS (اشیاء) TAB */}
-                {activeTab === 'products' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">اشیاء — Pulse & Grain Products</h1>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {productsList.map((prd, i) => (
-                        <div key={i} className="bg-dark-900 border border-dark-800 rounded-xl p-5 flex items-center justify-between">
-                          <div>
-                            <span className="text-xs font-mono font-bold text-brand-500">{prd.sku}</span>
-                            <h3 className="font-bold text-slate-100 text-base font-nastaliq">{prd.name}</h3>
-                            <p className="text-xs text-slate-400 mt-1">Bag Packing Size: {prd.bagWeight}</p>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xl font-bold font-display text-emerald-400">{prd.stockBags} Bags</span>
-                            <p className="text-xs text-slate-400 mt-0.5">Rate: PKR {prd.rate.toLocaleString()} / bag</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 8. GATE PASS (گیٹ پاس) TAB */}
-                {activeTab === 'gatepass' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h1 className="text-3xl font-bold text-slate-100 font-nastaliq">گیٹ پاس — Gate Pass Security Control</h1>
-                      <button onClick={() => setActiveModal('gatepass')} className="bg-brand-500 hover:bg-brand-600 text-black text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20">
-                        <i data-lucide="plus" className="w-4 h-4"></i>
-                        <span>+ نیا گیٹ پاس (Generate Gate Pass)</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-dark-800 bg-dark-950 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="p-4">Pass ID</th>
-                            <th className="p-4">Vehicle Truck No</th>
-                            <th className="p-4">Driver Name</th>
-                            <th className="p-4">Pass Type</th>
-                            <th className="p-4">Goods & Quantity</th>
-                            <th className="p-4">Net Weight</th>
-                            <th className="p-4 text-right">Time & Status</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-dark-800 text-xs">
-                          {gatePassesList.map((gp, i) => (
-                            <tr key={i} className="hover:bg-dark-850/60 transition-colors">
-                              <td className="p-4 font-mono font-bold text-brand-500">{gp.id}</td>
-                              <td className="p-4 font-mono font-bold text-slate-100">{gp.truckNo}</td>
-                              <td className="p-4 text-slate-200 font-bold font-nastaliq">{gp.driver}</td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${gp.type === 'Outward Sale' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>
-                                  {gp.type}
-                                </span>
-                              </td>
-                              <td className="p-4 text-slate-300 font-semibold">{gp.goods}</td>
-                              <td className="p-4 font-mono font-bold text-slate-100">{gp.netWeight}</td>
-                              <td className="p-4 text-right">
-                                <span className="text-slate-400 block font-mono text-[11px]">{gp.time}</span>
-                                <span className="text-emerald-400 font-bold text-[11px]">{gp.status}</span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
               </main>
             </div>
 
-            {/* MODAL DIALOG FOR DATA ENTRY */}
+            {/* MODAL WINDOWS */}
             {activeModal && (
               <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div className="bg-dark-900 border border-dark-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
@@ -813,120 +911,43 @@
                     <i data-lucide="x" className="w-5 h-5"></i>
                   </button>
 
-                  {/* Roznamcha Modal */}
-                  {activeModal === 'roznamcha' && (
-                    <form onSubmit={handleAddRoznamcha} className="space-y-4">
-                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا روزنامچہ اندراج — Add Roznamcha Entry</h3>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Party Name (پارٹی کا نام)</label>
-                        <input type="text" required value={formRoznamcha.party} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, party: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="e.g. Haji Aslam Traders" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Description (تفصیل)</label>
-                        <input type="text" required value={formRoznamcha.description} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, description: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="e.g. Advance payment for 100 bags" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Type</label>
-                          <select value={formRoznamcha.type} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, type: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
-                            <option value="Cash Received">Cash Received (جمع کیش)</option>
-                            <option value="Cash Paid">Cash Paid (بنام کیش)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Amount (PKR)</label>
-                          <input type="number" required value={formRoznamcha.amount} onChange={(e) => setFormRoznamcha({ ...formRoznamcha, amount: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-brand-500" placeholder="50000" />
-                        </div>
-                      </div>
-                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs shadow-lg shadow-brand-500/25">Save Roznamcha Entry</button>
-                    </form>
-                  )}
-
                   {/* Worker Modal */}
                   {activeModal === 'worker' && (
-                    <form onSubmit={handleAddWorker} className="space-y-4">
-                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا کارکن — Add New Worker</h3>
+                    <form onSubmit={handleAddWorker} className="space-y-4 font-nastaliq">
+                      <h3 className="text-xl font-bold text-brand-500">نیا ورکر شامل کریں</h3>
                       <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Worker Name (کارکن کا نام)</label>
-                        <input type="text" required value={formWorker.name} onChange={(e) => setFormWorker({ ...formWorker, name: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="e.g. Tariq Mehmood" />
+                        <label className="block text-xs text-slate-400 mb-1">ورکر کا نام (Worker Name)</label>
+                        <input type="text" required value={formWorker.name} onChange={(e) => setFormWorker({ ...formWorker, name: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="محمد رمضان" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Role</label>
-                          <input type="text" required value={formWorker.role} onChange={(e) => setFormWorker({ ...formWorker, role: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Mill Operator" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Daily Wage (PKR)</label>
-                          <input type="number" required value={formWorker.dailyWage} onChange={(e) => setFormWorker({ ...formWorker, dailyWage: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="2000" />
-                        </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">ورکر کی قسم (Category)</label>
+                        <select value={formWorker.category} onChange={(e) => setFormWorker({ ...formWorker, category: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none font-nastaliq">
+                          <option value="دھلائی">دھلائی</option>
+                          <option value="دلائی">دلائی</option>
+                          <option value="رکشہ والا">رکشہ والا</option>
+                        </select>
                       </div>
-                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Save Worker Profile</button>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs font-nastaliq">ورکر محفوظ کریں</button>
                     </form>
                   )}
 
-                  {/* Purchase Modal */}
-                  {activeModal === 'purchase' && (
-                    <form onSubmit={handleAddPurchase} className="space-y-4">
-                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا اینوائس خرید — New Grain Purchase Order</h3>
+                  {/* Product Modal */}
+                  {activeModal === 'product' && (
+                    <form onSubmit={handleAddProduct} className="space-y-4">
+                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">Add New Product</h3>
                       <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Supplier Party</label>
-                        <input type="text" required value={formPurchase.supplier} onChange={(e) => setFormPurchase({ ...formPurchase, supplier: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Sargodha Mills" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Bags Count</label>
-                          <input type="number" required value={formPurchase.bags} onChange={(e) => setFormPurchase({ ...formPurchase, bags: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="300" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Rate / Maund (40KG)</label>
-                          <input type="number" required value={formPurchase.ratePerMaund} onChange={(e) => setFormPurchase({ ...formPurchase, ratePerMaund: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="6800" />
-                        </div>
-                      </div>
-                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Save Purchase Order</button>
-                    </form>
-                  )}
-
-                  {/* Sale Modal */}
-                  {activeModal === 'sale' && (
-                    <form onSubmit={handleAddSale} className="space-y-4">
-                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا اینوائس فروخت — Create Sales Invoice</h3>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Customer Party</label>
-                        <input type="text" required value={formSale.customer} onChange={(e) => setFormSale({ ...formSale, customer: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Faisalabad Traders" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Bags Count</label>
-                          <input type="number" required value={formSale.bags} onChange={(e) => setFormSale({ ...formSale, bags: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="150" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Rate / Bag (PKR)</label>
-                          <input type="number" required value={formSale.rate} onChange={(e) => setFormSale({ ...formSale, rate: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="8200" />
-                        </div>
-                      </div>
-                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Generate Sales Invoice</button>
-                    </form>
-                  )}
-
-                  {/* GatePass Modal */}
-                  {activeModal === 'gatepass' && (
-                    <form onSubmit={handleAddGatePass} className="space-y-4">
-                      <h3 className="text-xl font-bold font-nastaliq text-brand-500">نیا گیٹ پاس — Generate Gate Pass</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Vehicle Truck No</label>
-                          <input type="text" required value={formGatePass.truckNo} onChange={(e) => setFormGatePass({ ...formGatePass, truckNo: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="FSD-7892" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">Driver Name</label>
-                          <input type="text" required value={formGatePass.driver} onChange={(e) => setFormGatePass({ ...formGatePass, driver: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="Rashid Khan" />
-                        </div>
+                        <label className="block text-xs text-slate-400 mb-1 font-nastaliq">اردو نام (Product Urdu Name)</label>
+                        <input type="text" required value={formProduct.urduName} onChange={(e) => setFormProduct({ ...formProduct, urduName: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none font-nastaliq" placeholder="ماش سالم چمن-خام" />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-400 mb-1">Goods Description & Quantity</label>
-                        <input type="text" required value={formGatePass.goods} onChange={(e) => setFormGatePass({ ...formGatePass, goods: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" placeholder="250 Bags Daal Chana" />
+                        <label className="block text-xs text-slate-400 mb-1">Unit Weight</label>
+                        <select value={formProduct.unit} onChange={(e) => setFormProduct({ ...formProduct, unit: e.target.value })} className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
+                          <option value="50Kg">50Kg</option>
+                          <option value="25Kg">25Kg</option>
+                          <option value="100Kg">100Kg</option>
+                        </select>
                       </div>
-                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Issue Official Gate Pass</button>
+                      <button type="submit" className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-xl text-xs">Save Product</button>
                     </form>
                   )}
                 </div>
